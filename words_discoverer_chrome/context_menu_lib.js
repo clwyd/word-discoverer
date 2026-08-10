@@ -179,6 +179,42 @@ function get_dict_definition_url(dictUrl, text) {
     return dictUrl + encodeURIComponent(text);
 }
 
+function google_translate_lang(rawLang) {
+    var lang = (rawLang || "en").replace("_", "-");
+    var lowerLang = lang.toLowerCase();
+    if (lowerLang == "zh" || lowerLang == "zh-cn" || lowerLang == "zh-sg") {
+        return "zh-CN";
+    }
+    if (lowerLang == "zh-tw" || lowerLang == "zh-hk" || lowerLang == "zh-mo") {
+        return "zh-TW";
+    }
+    return lang.split("-")[0];
+}
+
+function google_translate_url(targetLang) {
+    var lang = encodeURIComponent(targetLang);
+    return "https://translate.google.com/?hl=" + lang + "&sl=en&tl=" + lang + "&op=translate&text=";
+}
+
+function normalize_online_dicts(dictPairs) {
+    var changed = false;
+    if (!Array.isArray(dictPairs)) {
+        return changed;
+    }
+    for (var i = 0; i < dictPairs.length; ++i) {
+        var dict = dictPairs[i];
+        if (!dict || typeof dict.url !== "string") {
+            continue;
+        }
+        var match = dict.url.match(/^https:\/\/translate\.google\.com\/#en\/([^/]+)\/$/);
+        if (match) {
+            dict.url = google_translate_url(google_translate_lang(match[1]));
+            changed = true;
+        }
+    }
+    return changed;
+}
+
 function showDefinition(dictUrl, text) {
     var fullUrl = get_dict_definition_url(dictUrl, text);
     chrome.tabs.create({'url': fullUrl}, function(tab) {
@@ -232,13 +268,13 @@ function handleContextMenuClick(info, tab) {
 function make_default_online_dicts() {
     result = [];
 
-    var uiLang = chrome.i18n.getUILanguage();
-    uiLang = uiLang.split('-')[0];
+    var rawUiLang = chrome.i18n.getUILanguage();
+    var uiLang = rawUiLang.split(/[-_]/)[0];
     if (uiLang != 'en' && isoLangs.hasOwnProperty(uiLang)) {
         var langName = isoLangs[uiLang];
         result.push({
             title: spformat(chrome.i18n.getMessage("dictTranslateGoogle"), langName),
-            url: "https://translate.google.com/#en/" + uiLang + "/"
+            url: google_translate_url(google_translate_lang(rawUiLang))
         });
     }
     result.push({title: chrome.i18n.getMessage("dictMerriamWebster"), url: "https://www.merriam-webster.com/dictionary/"});

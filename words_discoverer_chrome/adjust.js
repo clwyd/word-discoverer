@@ -194,7 +194,7 @@ function process_test_new_dict() {
     dictUrl = dictUrl.trim();
     if (!dictUrl)
         return;
-    url = dictUrl + 'test';
+    url = get_dict_definition_url(dictUrl, 'test');
     chrome.tabs.create({'url': url}, function (tab) {
     });
 }
@@ -206,7 +206,7 @@ function process_test_old_dict(e) {
     if (!btn_id.startsWith('testDictBtn_'))
         return;
     var btn_no = parseInt(btn_id.split('_')[1]);
-    url = wd_online_dicts[btn_no].url + 'test';
+    url = get_dict_definition_url(wd_online_dicts[btn_no].url, 'test');
     chrome.tabs.create({'url': url}, function (tab) {
     });
 }
@@ -388,6 +388,9 @@ function process_display() {
             wd_hl_settings = result.wd_hl_settings;
             wd_hover_settings = result.wd_hover_settings;
             wd_online_dicts = result.wd_online_dicts;
+            if (normalize_online_dicts(wd_online_dicts)) {
+                chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
+            }
             wd_enable_tts = result.wd_enable_tts ? true : false;
 
             var wd_developer_mode = result.wd_developer_mode;

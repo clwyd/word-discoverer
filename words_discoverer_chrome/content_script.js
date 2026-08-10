@@ -425,6 +425,9 @@ function create_bubble() {
     var bubbleDOM = document.createElement('div');
     bubbleDOM.setAttribute('class', 'wdSelectionBubble');
     bubbleDOM.setAttribute("id", "wd_selection_bubble")
+    bubbleDOM.addEventListener("mousedown", function (e) {
+        e.stopPropagation();
+    });
 
     var infoSpan = document.createElement('span');
     infoSpan.setAttribute("id", "wd_selection_bubble_text")
@@ -498,6 +501,7 @@ function initForPage() {
         dict_words = result.words_discoverer_eng_dict;
         dict_idioms = result.wd_idioms;
         wd_online_dicts = result.wd_online_dicts;
+        normalize_online_dicts(wd_online_dicts);
         wd_enable_tts = result.wd_enable_tts;
         user_vocabulary = result.wd_user_vocabulary;
         wd_hover_settings = result.wd_hover_settings;

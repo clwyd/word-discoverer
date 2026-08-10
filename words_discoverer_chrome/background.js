@@ -105,8 +105,7 @@ function drive_request(req_params, success_cb) {
     fetch(req_params.path, options).then(function (response) {
         return response.text().then(function (body) {
             var result = undefined;
-            var contentType = response.headers.get("content-type") || "";
-            if (body && contentType.indexOf("application/json") !== -1) {
+            if (body && req_params.response_type !== "text") {
                 result = JSON.parse(body);
             }
             success_cb({status: response.status, result: result, body: body});
@@ -201,7 +200,7 @@ function create_new_file(fname, parent_dir_id, success_cb) {
 
 function upload_file_content(file_id, file_content, success_cb) {
     var req_params = {
-        'path': 'https://www.googleapis.com/upload/drive/v3/files/' + file_id,
+        'path': 'https://www.googleapis.com/upload/drive/v3/files/' + file_id + '?uploadType=media',
         'method': 'PATCH',
         'body': file_content
     };
@@ -218,7 +217,7 @@ function upload_file_content(file_id, file_content, success_cb) {
 function fetch_file_content(file_id, success_cb) {
     // https://developers.google.com/drive/v3/web/manage-downloads
     var full_query_url = 'https://www.googleapis.com/drive/v3/files/' + file_id + '?alt=media';
-    drive_request({'path': full_query_url, 'method': 'GET'}, function (jsonResp) {
+    drive_request({'path': full_query_url, 'method': 'GET', 'response_type': 'text'}, function (jsonResp) {
         if (jsonResp.status != 200) {
             report_sync_failure('Bad status: ' + jsonResp.status + ' for getting content of file: ' + file_id);
             return;
@@ -456,6 +455,8 @@ function initialize_extension() {
         var wd_online_dicts = result.wd_online_dicts;
         if (typeof wd_online_dicts == 'undefined') {
             wd_online_dicts = make_default_online_dicts();
+            chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
+        } else if (normalize_online_dicts(wd_online_dicts)) {
             chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
         }
         initContextMenus(wd_online_dicts);
