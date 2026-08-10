@@ -242,6 +242,54 @@
   "vocabularyPageTitle": {
     "message": "Your Vocabulary"
   },
+  "vocabSearchPlaceholder": {
+    "message": "Search vocabulary"
+  },
+  "vocabSortAlpha": {
+    "message": "A-Z"
+  },
+  "vocabSortFrequency": {
+    "message": "Frequency"
+  },
+  "vocabSortKind": {
+    "message": "Type"
+  },
+  "vocabExport": {
+    "message": "Export"
+  },
+  "vocabImport": {
+    "message": "Import"
+  },
+  "vocabDelete": {
+    "message": "Delete"
+  },
+  "vocabTypeWord": {
+    "message": "Word"
+  },
+  "vocabTypeIdiom": {
+    "message": "Idiom"
+  },
+  "vocabTypeCustom": {
+    "message": "Custom"
+  },
+  "vocabType": {
+    "message": "Type"
+  },
+  "vocabLemma": {
+    "message": "Lemma"
+  },
+  "vocabFrequency": {
+    "message": "Frequency"
+  },
+  "vocabFrequencyShort": {
+    "message": "Freq"
+  },
+  "vocabEntryCount": {
+    "message": "{0} entries"
+  },
+  "vocabNoMatches": {
+    "message": "No matching entries"
+  },
   "importPageTitle": {
     "message": "Word Discoverer: Import vocabulary"
   },

@@ -242,6 +242,54 @@
   "vocabularyPageTitle": {
     "message": "你的词汇表"
   },
+  "vocabSearchPlaceholder": {
+    "message": "搜索词汇"
+  },
+  "vocabSortAlpha": {
+    "message": "A-Z"
+  },
+  "vocabSortFrequency": {
+    "message": "词频"
+  },
+  "vocabSortKind": {
+    "message": "类型"
+  },
+  "vocabExport": {
+    "message": "导出"
+  },
+  "vocabImport": {
+    "message": "导入"
+  },
+  "vocabDelete": {
+    "message": "删除"
+  },
+  "vocabTypeWord": {
+    "message": "单词"
+  },
+  "vocabTypeIdiom": {
+    "message": "短语"
+  },
+  "vocabTypeCustom": {
+    "message": "自定义"
+  },
+  "vocabType": {
+    "message": "类型"
+  },
+  "vocabLemma": {
+    "message": "原形"
+  },
+  "vocabFrequency": {
+    "message": "词频"
+  },
+  "vocabFrequencyShort": {
+    "message": "词频"
+  },
+  "vocabEntryCount": {
+    "message": "{0} 个词条"
+  },
+  "vocabNoMatches": {
+    "message": "没有匹配的词条"
+  },
   "importPageTitle": {
     "message": "Word Discoverer：导入词汇表"
   },

@@ -21,6 +21,8 @@ var word_re = new RegExp("^[a-z][a-z]*$");
 var function_key_is_pressed = false;
 var rendered_node_id = null;
 var node_to_render_id = null;
+var inserted_node_queue = [];
+var inserted_node_flush_timer = null;
 
 
 function make_class_name(lemma) {
@@ -137,27 +139,39 @@ function process_hl_leave() {
 }
 
 
-function processMouse(e) {
-    var hitNode = document.elementFromPoint(e.clientX, e.clientY);
-    if (!hitNode) {
-        process_hl_leave();
-        return;
+function get_highlight_node(node) {
+    if (!node || typeof node.getAttribute !== 'function') {
+        return null;
     }
     var classattr = null;
     try {
-        classattr = hitNode.getAttribute('class');
+        classattr = node.getAttribute('class');
     } catch (exc) {
-        process_hl_leave();
-        return;
+        return null;
     }
     if (!classattr || !classattr.startsWith("wdautohl_")) {
-        process_hl_leave();
+        return null;
+    }
+    return node;
+}
+
+
+function processPointerOver(e) {
+    var hitNode = get_highlight_node(e.target);
+    if (!hitNode) {
         return;
     }
     node_to_render_id = hitNode.id;
     setTimeout(function () {
         renderBubble();
     }, 200);
+}
+
+
+function processPointerOut(e) {
+    if (get_highlight_node(e.target)) {
+        process_hl_leave();
+    }
 }
 
 
@@ -282,12 +296,21 @@ function text_to_hl_nodes(text, dst) {
 
 
 var good_tags_list = ["P", "H1", "H2", "H3", "H4", "H5", "H6", "B", "SMALL", "STRONG", "Q", "DIV", "SPAN"];
+var skip_parent_selector = "script,style,textarea,input,select,option,code,pre,kbd,samp,[contenteditable],[aria-hidden=true],[hidden]";
 
 
 function mygoodfilter(node) {
-    if (good_tags_list.indexOf(node.parentNode.tagName) !== -1)
-        return NodeFilter.FILTER_ACCEPT;
-    return NodeFilter.FILTER_SKIP;
+    var parent = node.parentNode;
+    if (!parent || good_tags_list.indexOf(parent.tagName) === -1) {
+        return NodeFilter.FILTER_SKIP;
+    }
+    if (parent.closest && parent.closest(skip_parent_selector)) {
+        return NodeFilter.FILTER_SKIP;
+    }
+    if (parent.offsetParent === null) {
+        return NodeFilter.FILTER_SKIP;
+    }
+    return NodeFilter.FILTER_ACCEPT;
 }
 
 
@@ -339,6 +362,10 @@ function doHighlightText(textNodes) {
 function processInsertedNode(inobj) {
     if (!inobj)
         return;
+    if (inobj.nodeType === Node.TEXT_NODE) {
+        doHighlightText([inobj]);
+        return;
+    }
     var classattr = null;
     if (typeof inobj.getAttribute !== 'function') {
         return;
@@ -355,12 +382,30 @@ function processInsertedNode(inobj) {
 }
 
 
+function flushInsertedNodes() {
+    var nodes = inserted_node_queue;
+    inserted_node_queue = [];
+    inserted_node_flush_timer = null;
+    for (var i = 0; i < nodes.length; i++) {
+        processInsertedNode(nodes[i]);
+    }
+}
+
+
+function scheduleInsertedNode(node) {
+    inserted_node_queue.push(node);
+    if (!inserted_node_flush_timer) {
+        inserted_node_flush_timer = setTimeout(flushInsertedNodes, 120);
+    }
+}
+
+
 function observeInsertedNodes(root) {
     var observer = new MutationObserver(function (mutations) {
         for (var i = 0; i < mutations.length; i++) {
             var nodes = mutations[i].addedNodes;
             for (var j = 0; j < nodes.length; j++) {
-                processInsertedNode(nodes[j]);
+                scheduleInsertedNode(nodes[j]);
             }
         }
     });
@@ -466,10 +511,10 @@ function create_bubble() {
         dictButton.textContent = dictPairs[i].title;
         dictButton.setAttribute('wdDictRefUrl', dictPairs[i].url);
         dictButton.addEventListener("click", function (e) {
-            target = e.target;
-            dictUrl = target.getAttribute('wdDictRefUrl');
+            var target = e.target;
+            var dictUrl = target.getAttribute('wdDictRefUrl');
             var newTabUrl = get_dict_definition_url(dictUrl, current_lexeme);
-            chrome.runtime.sendMessage({wdm_new_tab_url: newTabUrl});
+            chrome.runtime.sendMessage({wdm_lookup_popup_url: newTabUrl});
         });
         bubbleDOM.appendChild(dictButton);
     }
@@ -497,61 +542,64 @@ function initForPage() {
         }
     });
 
-    chrome.storage.local.get(['words_discoverer_eng_dict', 'wd_online_dicts', 'wd_idioms', 'wd_hover_settings', 'wd_word_max_rank', 'wd_show_percents', 'wd_is_enabled', 'wd_user_vocabulary', 'wd_hl_settings', 'wd_black_list', 'wd_white_list', 'wd_enable_tts'], function (result) {
-        dict_words = result.words_discoverer_eng_dict;
-        dict_idioms = result.wd_idioms;
-        wd_online_dicts = result.wd_online_dicts;
-        wd_enable_tts = result.wd_enable_tts;
-        user_vocabulary = result.wd_user_vocabulary;
-        wd_hover_settings = result.wd_hover_settings;
-        word_max_rank = result.wd_word_max_rank;
-        var show_percents = result.wd_show_percents;
-        wd_hl_settings = result.wd_hl_settings;
-        min_show_rank = (show_percents * word_max_rank) / 100;
-        is_enabled = result.wd_is_enabled;
-        var black_list = result.wd_black_list;
-        var white_list = result.wd_white_list;
-
+    chrome.storage.local.get(['wd_is_enabled', 'wd_black_list', 'wd_white_list'], function (result) {
+        is_enabled = typeof result.wd_is_enabled === "undefined" ? true : result.wd_is_enabled;
+        var black_list = result.wd_black_list || {};
+        var white_list = result.wd_white_list || {};
         get_verdict(is_enabled, black_list, white_list, function (verdict) {
             chrome.runtime.sendMessage({wdm_verdict: verdict});
             if (verdict !== "highlight")
                 return;
 
-            document.addEventListener("keydown", function (event) {
-                if (event.keyCode == 17) {
-                    function_key_is_pressed = true;
-                    renderBubble();
-                    return;
-                }
-                var elementTagName = event.target.tagName;
-                if (!disable_by_keypress && elementTagName != 'BODY') {
-                    //workaround to prevent highlighting in facebook messages
-                    //this logic can also be helpful in other situations, it's better play safe and stop highlighting when user enters data.
-                    disable_by_keypress = true;
-                    chrome.runtime.sendMessage({wdm_verdict: "keyboard"});
-                }
-            });
+            chrome.storage.local.get(['words_discoverer_eng_dict', 'wd_online_dicts', 'wd_idioms', 'wd_hover_settings', 'wd_word_max_rank', 'wd_show_percents', 'wd_user_vocabulary', 'wd_hl_settings', 'wd_enable_tts'], function (result) {
+                dict_words = result.words_discoverer_eng_dict || {};
+                dict_idioms = result.wd_idioms || {};
+                wd_online_dicts = result.wd_online_dicts || make_default_online_dicts();
+                wd_enable_tts = result.wd_enable_tts;
+                user_vocabulary = result.wd_user_vocabulary || {};
+                wd_hover_settings = result.wd_hover_settings || {hl_hover: 'always', ow_hover: 'never'};
+                word_max_rank = result.wd_word_max_rank || 0;
+                var show_percents = result.wd_show_percents || 15;
+                wd_hl_settings = result.wd_hl_settings || make_default_hl_settings();
+                min_show_rank = (show_percents * word_max_rank) / 100;
 
-            document.addEventListener("keyup", function (event) {
-                if (event.keyCode == 17) {
-                    function_key_is_pressed = false;
-                    return;
-                }
-            });
+                document.addEventListener("keydown", function (event) {
+                    if (event.keyCode == 17) {
+                        function_key_is_pressed = true;
+                        renderBubble();
+                        return;
+                    }
+                    var elementTagName = event.target.tagName;
+                    if (!disable_by_keypress && elementTagName != 'BODY') {
+                        //workaround to prevent highlighting in facebook messages
+                        //this logic can also be helpful in other situations, it's better play safe and stop highlighting when user enters data.
+                        disable_by_keypress = true;
+                        chrome.runtime.sendMessage({wdm_verdict: "keyboard"});
+                    }
+                });
 
-            var textNodes = textNodesUnder(document.body);
-            doHighlightText(textNodes);
+                document.addEventListener("keyup", function (event) {
+                    if (event.keyCode == 17) {
+                        function_key_is_pressed = false;
+                        return;
+                    }
+                });
 
-            var bubbleDOM = create_bubble();
-            document.body.appendChild(bubbleDOM);
-            document.addEventListener('mousedown', function () {
-                hideBubble(true);
-            }, false);
-            document.addEventListener('mousemove', processMouse, false);
-            observeInsertedNodes(document.body);
-            window.addEventListener('scroll', function () {
-                node_to_render_id = null;
-                hideBubble(true);
+                var textNodes = textNodesUnder(document.body);
+                doHighlightText(textNodes);
+
+                var bubbleDOM = create_bubble();
+                document.body.appendChild(bubbleDOM);
+                document.addEventListener('mousedown', function () {
+                    hideBubble(true);
+                }, false);
+                document.addEventListener('pointerover', processPointerOver, false);
+                document.addEventListener('pointerout', processPointerOut, false);
+                observeInsertedNodes(document.body);
+                window.addEventListener('scroll', function () {
+                    node_to_render_id = null;
+                    hideBubble(true);
+                });
             });
         });
     });

@@ -367,6 +367,28 @@ function start_sync_sequence(interactive_authorization) {
 }
 
 
+function open_lookup_popup(url, sender) {
+    var popupOptions = {
+        url: url,
+        type: "popup",
+        width: 760,
+        height: 640,
+        focused: true
+    };
+    if (sender && sender.tab && typeof sender.tab.windowId === "number") {
+        chrome.windows.get(sender.tab.windowId, function (win) {
+            if (win) {
+                popupOptions.left = Math.max(0, win.left + win.width - popupOptions.width - 24);
+                popupOptions.top = Math.max(0, win.top + 72);
+            }
+            chrome.windows.create(popupOptions);
+        });
+        return;
+    }
+    chrome.windows.create(popupOptions);
+}
+
+
 function initialize_extension() {
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         if (request.wdm_request == "hostname") {
@@ -409,6 +431,8 @@ function initialize_extension() {
             var fullUrl = request.wdm_new_tab_url;
             chrome.tabs.create({'url': fullUrl}, function (tab) {
             });
+        } else if (request.wdm_lookup_popup_url) {
+            open_lookup_popup(request.wdm_lookup_popup_url, sender);
         } else if (request.wdm_request == "gd_sync") {
             start_sync_sequence(request.interactive_mode);
         }
@@ -419,28 +443,7 @@ function initialize_extension() {
         load_idioms();
         wd_hl_settings = result.wd_hl_settings;
         if (typeof wd_hl_settings == 'undefined') {
-            word_hl_params = {
-                enabled: true,
-                quoted: false,
-                bold: true,
-                useBackground: false,
-                backgroundColor: "rgb(255, 248, 220)",
-                useColor: true,
-                color: "red"
-            };
-            idiom_hl_params = {
-                enabled: true,
-                quoted: false,
-                bold: true,
-                useBackground: false,
-                backgroundColor: "rgb(255, 248, 220)",
-                useColor: true,
-                color: "blue"
-            };
-            wd_hl_settings = {
-                wordParams: word_hl_params,
-                idiomParams: idiom_hl_params,
-            };
+            wd_hl_settings = make_default_hl_settings();
             chrome.storage.local.set({"wd_hl_settings": wd_hl_settings});
         }
         wd_enable_tts = result.wd_enable_tts;

@@ -88,6 +88,30 @@ function add_lexeme(lexeme, result_handler) {
 }
 
 
+function make_default_hl_settings() {
+    return {
+        wordParams: {
+            enabled: true,
+            quoted: false,
+            bold: true,
+            useBackground: false,
+            backgroundColor: "rgb(255, 248, 220)",
+            useColor: true,
+            color: "red"
+        },
+        idiomParams: {
+            enabled: true,
+            quoted: false,
+            bold: true,
+            useBackground: false,
+            backgroundColor: "rgb(255, 248, 220)",
+            useColor: true,
+            color: "blue"
+        }
+    };
+}
+
+
 function make_hl_style(hl_params) {
     if (!hl_params.enabled)
         return undefined;
@@ -117,15 +141,24 @@ function localizeHtmlPage() {
     }
 
     document.querySelectorAll("[data-i18n]").forEach(function(node) {
-        node.textContent = msg(node.getAttribute("data-i18n"));
+        var translated = msg(node.getAttribute("data-i18n"));
+        if (translated) {
+            node.textContent = translated;
+        }
     });
     document.querySelectorAll("[data-i18n-html]").forEach(function(node) {
-        node.innerHTML = msg(node.getAttribute("data-i18n-html"));
+        var translated = msg(node.getAttribute("data-i18n-html"));
+        if (translated) {
+            node.innerHTML = translated;
+        }
     });
 
     ["title", "placeholder", "value", "aria-label", "alt"].forEach(function(attr) {
         document.querySelectorAll("[data-i18n-" + attr + "]").forEach(function(node) {
-            node.setAttribute(attr, msg(node.getAttribute("data-i18n-" + attr)));
+            var translated = msg(node.getAttribute("data-i18n-" + attr));
+            if (translated) {
+                node.setAttribute(attr, translated);
+            }
         });
     });
 
