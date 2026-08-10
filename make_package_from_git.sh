@@ -17,7 +17,6 @@ mkdir -p "$dist_dir"
 tmp_archive="$(mktemp "$dist_dir/.word-discoverer-$version.XXXXXX.zip")"
 git -C "$repo_root" archive \
     --format=zip \
-    --prefix=word-discoverer/ \
     -o "$tmp_archive" \
     HEAD:words_discoverer_chrome
 mv "$tmp_archive" "$archive"
