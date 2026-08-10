@@ -501,7 +501,6 @@ function initForPage() {
         dict_words = result.words_discoverer_eng_dict;
         dict_idioms = result.wd_idioms;
         wd_online_dicts = result.wd_online_dicts;
-        normalize_online_dicts(wd_online_dicts);
         wd_enable_tts = result.wd_enable_tts;
         user_vocabulary = result.wd_user_vocabulary;
         wd_hover_settings = result.wd_hover_settings;

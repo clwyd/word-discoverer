@@ -82,9 +82,6 @@ async function runBackgroundLib() {
     assert.strictEqual(ctx.google_translate_url("zh-CN"), "https://translate.google.com/?hl=zh-CN&sl=en&tl=zh-CN&op=translate&text=");
     assert.strictEqual(ctx.get_dict_definition_url(ctx.google_translate_url("zh-CN"), "a number of"), "https://translate.google.com/?hl=zh-CN&sl=en&tl=zh-CN&op=translate&text=a%20number%20of");
 
-    const oldDicts = [{title: "Translate", url: "https://translate.google.com/#en/zh/"}];
-    assert.strictEqual(ctx.normalize_online_dicts(oldDicts), true);
-    assert.strictEqual(oldDicts[0].url, "https://translate.google.com/?hl=zh-CN&sl=en&tl=zh-CN&op=translate&text=");
     assert.strictEqual(ctx.make_default_online_dicts()[0].url, "https://translate.google.com/?hl=zh-CN&sl=en&tl=zh-CN&op=translate&text=");
 
     const contentScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/content_script.js"), "utf8");

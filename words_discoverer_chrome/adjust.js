@@ -388,9 +388,6 @@ function process_display() {
             wd_hl_settings = result.wd_hl_settings;
             wd_hover_settings = result.wd_hover_settings;
             wd_online_dicts = result.wd_online_dicts;
-            if (normalize_online_dicts(wd_online_dicts)) {
-                chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
-            }
             wd_enable_tts = result.wd_enable_tts ? true : false;
 
             var wd_developer_mode = result.wd_developer_mode;

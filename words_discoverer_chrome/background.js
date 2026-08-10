@@ -456,8 +456,6 @@ function initialize_extension() {
         if (typeof wd_online_dicts == 'undefined') {
             wd_online_dicts = make_default_online_dicts();
             chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
-        } else if (normalize_online_dicts(wd_online_dicts)) {
-            chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
         }
         initContextMenus(wd_online_dicts);
 

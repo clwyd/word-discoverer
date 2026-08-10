@@ -196,25 +196,6 @@ function google_translate_url(targetLang) {
     return "https://translate.google.com/?hl=" + lang + "&sl=en&tl=" + lang + "&op=translate&text=";
 }
 
-function normalize_online_dicts(dictPairs) {
-    var changed = false;
-    if (!Array.isArray(dictPairs)) {
-        return changed;
-    }
-    for (var i = 0; i < dictPairs.length; ++i) {
-        var dict = dictPairs[i];
-        if (!dict || typeof dict.url !== "string") {
-            continue;
-        }
-        var match = dict.url.match(/^https:\/\/translate\.google\.com\/#en\/([^/]+)\/$/);
-        if (match) {
-            dict.url = google_translate_url(google_translate_lang(match[1]));
-            changed = true;
-        }
-    }
-    return changed;
-}
-
 function showDefinition(dictUrl, text) {
     var fullUrl = get_dict_definition_url(dictUrl, text);
     chrome.tabs.create({'url': fullUrl}, function(tab) {
