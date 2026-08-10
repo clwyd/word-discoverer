@@ -448,7 +448,7 @@ function create_bubble() {
 
     var speakButton = document.createElement('button');
     speakButton.setAttribute('class', 'wdAddButton');
-    speakButton.textContent = 'Audio';
+    speakButton.textContent = chrome.i18n.getMessage("audioButton");
     speakButton.style.marginBottom = "4px";
     speakButton.addEventListener("click", function () {
         bubble_handle_tts(current_lexeme);

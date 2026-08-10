@@ -12,6 +12,37 @@ var hover_popup_types = ['never', 'key', 'always'];
 var target_types = ['hl', 'ow']
 
 
+function wd_msg(key) {
+    return chrome.i18n.getMessage(key) || key;
+}
+
+
+function wd_fmt(key) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return spformat.apply(null, [wd_msg(key)].concat(args));
+}
+
+
+function format_sync_elapsed(seconds_passed) {
+    var parts = [];
+    var p_days = Math.floor(seconds_passed / (3600 * 24));
+    seconds_passed %= (3600 * 24);
+    var p_hours = Math.floor(seconds_passed / 3600);
+    seconds_passed %= 3600;
+    var p_minutes = Math.floor(seconds_passed / 60);
+    var p_seconds = Math.floor(seconds_passed % 60);
+
+    if (p_days > 0)
+        parts.push(wd_fmt("durationDays", p_days));
+    if (p_hours > 0 || parts.length)
+        parts.push(wd_fmt("durationHours", p_hours));
+    if (p_minutes > 0 || parts.length)
+        parts.push(wd_fmt("durationMinutes", p_minutes));
+    parts.push(wd_fmt("durationSeconds", p_seconds));
+    return parts.join(" ");
+}
+
+
 function display_sync_interface() {
     chrome.storage.local.get(["wd_gd_sync_enabled", "wd_last_sync_error", "wd_last_sync"], function (result) {
         wd_last_sync_error = result.wd_last_sync_error;
@@ -25,27 +56,14 @@ function display_sync_interface() {
         document.getElementById("gdStopSyncButton").style.display = 'inline-block';
         document.getElementById("syncStatusFeedback").style.display = 'inline';
         if (wd_last_sync_error != null) {
-            document.getElementById("syncStatusFeedback").textContent = 'Error: ' + wd_last_sync_error;
+            document.getElementById("syncStatusFeedback").textContent = wd_fmt("syncError", wd_last_sync_error);
         } else {
-            document.getElementById("syncStatusFeedback").textContent = "Synchronized.";
+            document.getElementById("syncStatusFeedback").textContent = wd_msg("syncSynchronized");
         }
         if (typeof wd_last_sync !== 'undefined') {
             var cur_date = new Date();
             var seconds_passed = (cur_date.getTime() - wd_last_sync) / 1000;
-            var p_days = Math.floor(seconds_passed / (3600 * 24));
-            seconds_passed %= (3600 * 24);
-            var p_hours = Math.floor(seconds_passed / 3600);
-            seconds_passed %= 3600;
-            var p_minutes = Math.floor(seconds_passed / 60);
-            var p_seconds = Math.floor(seconds_passed % 60);
-            passed_time_msg = '';
-            if (p_days > 0)
-                passed_time_msg += p_days + ' days, ';
-            if (p_hours > 0 || p_days > 0)
-                passed_time_msg += p_hours + ' hours, ';
-            if (p_minutes > 0 || p_hours > 0 || p_days > 0)
-                passed_time_msg += p_minutes + ' minutes, ';
-            passed_time_msg += p_seconds + ' seconds since the last sync.';
+            passed_time_msg = wd_fmt("syncLastSyncAgo", format_sync_elapsed(seconds_passed));
             syncDateLabel = document.getElementById("lastSyncDate");
             syncDateLabel.style.display = 'inline';
             syncDateLabel.textContent = passed_time_msg;
@@ -61,7 +79,7 @@ function synchronize_now() {
         }
     });
     document.getElementById("syncStatusFeedback").style.display = 'inline';
-    document.getElementById("syncStatusFeedback").textContent = "Synchronization started...";
+    document.getElementById("syncStatusFeedback").textContent = wd_msg("syncStarted");
     chrome.storage.local.set({"wd_gd_sync_enabled": true}, function () {
         chrome.runtime.sendMessage({wdm_request: "gd_sync", interactive_mode: true});
     });
@@ -229,7 +247,7 @@ function show_user_dicts() {
         var testButton = document.createElement('button');
         testButton.setAttribute('class', 'shortButton');
         testButton.id = 'testDictBtn_' + i;
-        testButton.textContent = 'Test';
+        testButton.textContent = wd_msg("testBtn");
         testButton.addEventListener("click", process_test_old_dict);
         dicts_block.appendChild(testButton);
 

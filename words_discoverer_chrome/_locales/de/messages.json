@@ -145,5 +145,278 @@
   },
   "switchModeLabel": {
     "message": "Wechselmodus"
+  },
+  "advancedSettingsTitle": {
+    "message": "Advanced Settings"
+  },
+  "debugStorageSet": {
+    "message": "storage set dbg"
+  },
+  "debugStorageGet": {
+    "message": "storage get dbg"
+  },
+  "debugManifestWarnings": {
+    "message": "view manifest warnings"
+  },
+  "backupSyncHeader": {
+    "message": "Backup and sync with Google Drive."
+  },
+  "moreInfo": {
+    "message": "More Info"
+  },
+  "syncNow": {
+    "message": "Synchronize Now"
+  },
+  "stopSync": {
+    "message": "Stop Sync"
+  },
+  "adjustPronunciation": {
+    "message": "Adjust Pronunciation"
+  },
+  "enableAutoPronunciation": {
+    "message": "Enable Auto Pronunciation"
+  },
+  "wordExamplePrefix": {
+    "message": "Example English word: "
+  },
+  "wordExampleWord": {
+    "message": "highlighted"
+  },
+  "idiomExamplePrefix": {
+    "message": "Example expression: "
+  },
+  "idiomExampleText": {
+    "message": "highlighted English"
+  },
+  "syncError": {
+    "message": "Error: {0}"
+  },
+  "syncSynchronized": {
+    "message": "Synchronized."
+  },
+  "durationDays": {
+    "message": "{0} days"
+  },
+  "durationHours": {
+    "message": "{0} hours"
+  },
+  "durationMinutes": {
+    "message": "{0} minutes"
+  },
+  "durationSeconds": {
+    "message": "{0} seconds"
+  },
+  "syncLastSyncAgo": {
+    "message": "{0} since the last sync."
+  },
+  "syncStarted": {
+    "message": "Synchronization started..."
+  },
+  "importAddedInfo": {
+    "message": "Added {0} new words."
+  },
+  "importSkippedInfo": {
+    "message": "Skipped {0} existing words."
+  },
+  "audioButton": {
+    "message": "Audio"
+  },
+  "dictTranslateGoogle": {
+    "message": "Translate to {0} in Google"
+  },
+  "dictMerriamWebster": {
+    "message": "Define in Merriam-Webster"
+  },
+  "dictGoogleDefinition": {
+    "message": "Define in Google"
+  },
+  "dictGoogleImages": {
+    "message": "View pictures in Google"
+  },
+  "skipListPageTitle": {
+    "message": "Skip List - do NOT highlight these sites"
+  },
+  "favoritesListPageTitle": {
+    "message": "Favorites List - Always highlight these sites"
+  },
+  "vocabularyPageTitle": {
+    "message": "Your Vocabulary"
+  },
+  "importPageTitle": {
+    "message": "Word Discoverer: Import vocabulary"
+  },
+  "okButton": {
+    "message": "OK"
+  },
+  "helpPageTitle": {
+    "message": "Word Discoverer: Description"
+  },
+  "helpHeadingDescription": {
+    "message": "Description"
+  },
+  "helpDescription1": {
+    "message": "Word Discoverer highlights rare English dictionary words, idioms, and proverbs on web pages."
+  },
+  "helpDescription2": {
+    "message": "It helps non-native English learners discover new expressions while browsing the web."
+  },
+  "helpDescription3": {
+    "message": "Rare-word highlighting is useful because learners often skip vaguely known words when those words are not essential to understanding the sentence. Word Discoverer makes those words visible at the moment you meet them."
+  },
+  "helpDescription4": {
+    "message": "Word Discoverer is free, open source, ad-free, and works locally in your browser."
+  },
+  "helpGithubLink": {
+    "message": "GitHub page"
+  },
+  "helpMainFeatures": {
+    "message": "Main features"
+  },
+  "helpFeatureContext": {
+    "message": "Unlike word-of-the-day tools, Word Discoverer shows new words in the context of the page you are already reading."
+  },
+  "helpFeatureThreshold": {
+    "message": "You can tune the frequency threshold for highlighted words, for example skipping the most common 25% of English words and highlighting the rest. Idioms and proverbs can be enabled or disabled as a group."
+  },
+  "helpFeatureModes": {
+    "message": "Word Discoverer can operate in two modes:"
+  },
+  "helpModeDefault": {
+    "message": "Default mode highlights all sites except domains in your Skip List."
+  },
+  "helpModeFavorites": {
+    "message": "Favorites mode highlights only domains in your Favorites List. The list starts empty, so you choose exactly where highlighting is active."
+  },
+  "helpFeatureDictionary": {
+    "message": "The bundled dictionary contains about 50,000 words and about 1,600 idioms, including expressions such as \"bucket list\", \"moral high ground\", and \"money laundering\"."
+  },
+  "helpFeatureVocabulary": {
+    "message": "When you already know a highlighted word, add it to your personal vocabulary. The extension stores the normalized form, such as \"dog\" for \"dogs\", and stops highlighting it."
+  },
+  "helpFeatureLookup": {
+    "message": "Dictionary lookup is available from the hover popup and browser context menu. You can also keep using a dedicated dictionary extension alongside Word Discoverer."
+  },
+  "helpFeaturePrivacy": {
+    "message": "Word Discoverer respects your privacy. Highlighting works locally and does not send page text or vocabulary anywhere unless you explicitly enable Google Drive sync."
+  },
+  "helpInterestingFactTitle": {
+    "message": "Interesting fact"
+  },
+  "helpInterestingFact": {
+    "message": "Most adult native English speakers know about 20,000 to 35,000 words, so a personal vocabulary file can grow for a long time without running out of useful entries."
+  },
+  "helpUsageTitle": {
+    "message": "Usage recommendations"
+  },
+  "helpUsageBackup": {
+    "message": "Export or sync your personal vocabulary periodically."
+  },
+  "helpUsageDictionaryExtension": {
+    "message": "If you already use a dedicated dictionary extension, you can disable Word Discoverer dictionary links and keep only the vocabulary workflow."
+  },
+  "helpChangelogTitle": {
+    "message": "Changelog"
+  },
+  "changelog100": {
+    "message": "Initial version."
+  },
+  "changelog200Idioms": {
+    "message": "Added idiom and multi-word expression highlighting."
+  },
+  "changelog200Color": {
+    "message": "Added user-selectable highlight colors."
+  },
+  "changelog200Quotes": {
+    "message": "Added an option to quote words instead of color-highlighting them."
+  },
+  "changelog210Delete": {
+    "message": "Users can delete words from their vocabulary."
+  },
+  "changelog210Import": {
+    "message": "Vocabulary import now merges into the existing vocabulary instead of replacing it."
+  },
+  "changelog210Punctuation": {
+    "message": "Fixed highlighting next to punctuation marks."
+  },
+  "changelog250Modes": {
+    "message": "Added default-on and favorites-only modes."
+  },
+  "changelog250Icon": {
+    "message": "The icon turns gray when the extension is disabled for the current tab."
+  },
+  "changelog250Idioms": {
+    "message": "Added more idioms."
+  },
+  "changelog250Proverbs": {
+    "message": "Added proverbs."
+  },
+  "changelog260Dictionaries": {
+    "message": "The selection context menu can open several online dictionaries based on the UI language."
+  },
+  "changelog270Unhighlight": {
+    "message": "After adding an expression to your vocabulary, the current tab unhighlights it immediately."
+  },
+  "changelog270MoreIdioms": {
+    "message": "Added more idioms, including \"reinvent the wheel\" and \"tragedy of the commons\"."
+  },
+  "changelog280Hover": {
+    "message": "Added a convenient hover popup with a word-frequency indicator."
+  },
+  "changelog280Images": {
+    "message": "Replaced the thesaurus link with Google Image search."
+  },
+  "changelogBugFixes": {
+    "message": "Bug fixes."
+  },
+  "changelog290NonHighlighted": {
+    "message": "Added a hover popup for non-highlighted words."
+  },
+  "changelog290Ctrl": {
+    "message": "Added an option to use the Ctrl key to show the hover popup."
+  },
+  "changelog290Dicts": {
+    "message": "Added an adjustable online dictionary list."
+  },
+  "changelog290Idioms": {
+    "message": "Fixed idiom highlighting logic."
+  },
+  "changelog212Mv3": {
+    "message": "Migrated the extension to Manifest V3 and removed remote code execution."
+  },
+  "syncHelpPageTitle": {
+    "message": "Word Discoverer: Synchronization Info"
+  },
+  "syncAdvantagesTitle": {
+    "message": "Advantages of Synchronization"
+  },
+  "syncAdvBackup": {
+    "message": "Automatic vocabulary backup to Google Drive, so you do not have to manage manual backups as often."
+  },
+  "syncAdvCrossBrowser": {
+    "message": "Vocabulary synchronization between Word Discoverer installations in multiple browsers."
+  },
+  "syncDescriptionTitle": {
+    "message": "Description"
+  },
+  "syncDescription1": {
+    "message": "If you enable Google Drive synchronization, your vocabulary is backed up automatically after you add or remove words. The maximum automatic sync frequency is once every 30 minutes, and you can press Synchronize Now to sync manually."
+  },
+  "syncDescription2": {
+    "message": "If you use Word Discoverer in multiple browsers, their vocabularies are synchronized through your Google Drive."
+  },
+  "syncDescription3": {
+    "message": "Word Discoverer files are saved in the \"Words Discoverer Sync\" folder in your Google Drive root. Your vocabulary is stored in \"my_vocabulary.txt\". The \".my_vocabulary.backup\" file stores added and deleted words for merge safety."
+  },
+  "syncDescription4": {
+    "message": "To stop synchronization, press the Stop Sync button after sync has been enabled."
+  },
+  "syncDescription5": {
+    "message": "If the extension icon shows a red \"err\" badge, synchronization stopped because of an error. Try Synchronize Now again; if that does not help, restart the browser."
+  },
+  "syncDescription6": {
+    "message": "The easiest way to view your vocabulary in Google Drive without downloading it is to use Preview from the Google Drive file menu."
+  },
+  "syncScreenshotAlt": {
+    "message": "Google Drive preview screenshot"
   }
 }

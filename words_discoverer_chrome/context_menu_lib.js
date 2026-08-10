@@ -236,11 +236,14 @@ function make_default_online_dicts() {
     uiLang = uiLang.split('-')[0];
     if (uiLang != 'en' && isoLangs.hasOwnProperty(uiLang)) {
         var langName = isoLangs[uiLang];
-        result.push({title: "Translate to " + langName + " in Google", url: "https://translate.google.com/#en/" + uiLang + "/"});
+        result.push({
+            title: spformat(chrome.i18n.getMessage("dictTranslateGoogle"), langName),
+            url: "https://translate.google.com/#en/" + uiLang + "/"
+        });
     }
-    result.push({title: "Define in Merriam-Webster", url: "https://www.merriam-webster.com/dictionary/"});
-    result.push({title: "Define in Google", url: "https://encrypted.google.com/search?hl=en&gl=en&q=define:"});
-    result.push({title: "View pictures in Google", url: "https://encrypted.google.com/search?hl=en&gl=en&tbm=isch&q="});
+    result.push({title: chrome.i18n.getMessage("dictMerriamWebster"), url: "https://www.merriam-webster.com/dictionary/"});
+    result.push({title: chrome.i18n.getMessage("dictGoogleDefinition"), url: "https://encrypted.google.com/search?hl=en&gl=en&q=define:"});
+    result.push({title: chrome.i18n.getMessage("dictGoogleImages"), url: "https://encrypted.google.com/search?hl=en&gl=en&tbm=isch&q="});
     return result;
 }
 

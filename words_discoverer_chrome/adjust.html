@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
   <head>
+    <meta charset="utf-8">
     <style>
     body {
         background-color: rgb(255,248,220);
@@ -160,7 +161,7 @@
         margin: 4px 20px;
     }
     </style>
-    <title>Advanced Settings</title>
+    <title data-i18n="advancedSettingsTitle">Advanced Settings</title>
     <script src="common_lib.js"></script>
     <script src="FileSaver.js"></script>
     <script src="context_menu_lib.js"></script>
@@ -168,11 +169,11 @@
   </head>
   <body>
   <div id="debugControl" class="debugControlBlock">
-    <input type="text" id="setToStorageKey" class="dictAddUrl"><input type="text" id="setToStorageVal" class="dictAddUrl"><button class="longButton" id="setToStorageBtn">storage set dbg</button>
+    <input type="text" id="setToStorageKey" class="dictAddUrl"><input type="text" id="setToStorageVal" class="dictAddUrl"><button class="longButton" id="setToStorageBtn">__MSG_debugStorageSet__</button>
     <br>
-    <input type="text" id="getFromStorageKey" class="dictAddUrl"><button class="longButton" id="getFromStorageBtn">storage get dbg</button>
+    <input type="text" id="getFromStorageKey" class="dictAddUrl"><button class="longButton" id="getFromStorageBtn">__MSG_debugStorageGet__</button>
     <br>
-    <button class="longButton" id="testManifestWarningsBtn">view manifest warnings</button>
+    <button class="longButton" id="testManifestWarningsBtn">__MSG_debugManifestWarnings__</button>
   </div>
   <fieldset>
     <button class="longButton" id="saveVocab">__MSG_saveVocab__</button>
@@ -182,11 +183,11 @@
   </fieldset>
   <br>
   <fieldset>
-    <span class="smallHeader">Backup and sync with Google Drive.</span><a href="example.com" target="_blank" id="moreInfoLink">More Info</a>
+    <span class="smallHeader">__MSG_backupSyncHeader__</span><a href="example.com" target="_blank" id="moreInfoLink">__MSG_moreInfo__</a>
     <br>
     <br>
-    <button class="longButton" id="gdSyncButton">Synchronize Now</button>
-    <button class="longRedButton" id="gdStopSyncButton">Stop Sync</button>
+    <button class="longButton" id="gdSyncButton">__MSG_syncNow__</button>
+    <button class="longRedButton" id="gdStopSyncButton">__MSG_stopSync__</button>
     <br>
     <br>
     <div class="radioBlock">
@@ -201,8 +202,8 @@
   <!--pronunciation section-->
   <div id="adjustPronunciationSection">
       <fieldset>
-          <span class="smallHeader">Adjust Pronunciation</span><br>
-          <input type="checkbox" id="pronunciationEnabled"/>Enable Auto Pronunciation
+          <span class="smallHeader">__MSG_adjustPronunciation__</span><br>
+          <input type="checkbox" id="pronunciationEnabled"/><span class="cbLabel">__MSG_enableAutoPronunciation__</span>
       </fieldset>
   </div>
   <br>
@@ -269,7 +270,7 @@
         </div>
         <br>
         <br>
-        <span class="hlExample">Example of <span id="wql"></span><span id="wordHlText">highlighted</span><span id="wqr"></span> English word.</span><br>
+        <span class="hlExample"><span>__MSG_wordExamplePrefix__</span><span id="wql"></span><span id="wordHlText">__MSG_wordExampleWord__</span><span id="wqr"></span></span><br>
         <br>
       </div>
       <br>
@@ -301,7 +302,7 @@
         </div>
         <br>
         <br>
-        <span class="hlExample">Example of <span id="iql"></span><span id="idiomHlText">highlighted English</span><span id="iqr"></span> expression.</span><br>
+        <span class="hlExample"><span>__MSG_idiomExamplePrefix__</span><span id="iql"></span><span id="idiomHlText">__MSG_idiomExampleText__</span><span id="iqr"></span></span><br>
         <br>
       </div>
       <button class="longButton" id="saveVisuals">__MSG_saveVisuals__</button>

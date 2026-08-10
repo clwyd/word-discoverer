@@ -98,5 +98,6 @@ function process_display() {
 }
 
 document.addEventListener("DOMContentLoaded", function(event) {
+    localizeHtmlPage();
     process_display();
 });

@@ -39,8 +39,8 @@ function add_new_words(new_words) {
             chrome.storage.local.set(new_state, sync_if_needed);
         }
         var num_skipped = new_words.length - num_added;
-        document.getElementById("addedInfo").textContent = "Added " + num_added + " new words.";
-        document.getElementById("skippedInfo").textContent = "Skipped " + num_skipped + " existing words.";
+        document.getElementById("addedInfo").textContent = spformat(chrome.i18n.getMessage("importAddedInfo"), num_added);
+        document.getElementById("skippedInfo").textContent = spformat(chrome.i18n.getMessage("importSkippedInfo"), num_skipped);
     });
 }
 

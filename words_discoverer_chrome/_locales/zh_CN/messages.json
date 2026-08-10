@@ -1,55 +1,55 @@
 {
   "appName": {
-    "message": "单词发现者：扩大您的词汇",
+    "message": "Word Discoverer：扩展你的英语词汇",
     "description": "The title of the application, displayed in the web store."
   },
   "appDesc": {
-    "message": "突出显示网页上罕见的英语字典词汇和惯用语。促进英语语言学习并扩大词汇量。",
+    "message": "在网页上高亮较少见的英语单词、习语和谚语，帮助你学习英语并扩展词汇量。",
     "description": "The description of the application, displayed in the web store."
   },
   "menuItem": {
-    "message": "添加到词汇",
+    "message": "添加到词汇表",
     "description": "Text in context menu"
   },
   "rateTranslateDbg": {
-    "message": "不突出显示100 最常用的英语单词"
+    "message": "不高亮最常见的 100 个英语单词"
   },
   "rateInfo1": {
-    "message": "不突出显示",
+    "message": "不高亮最常见的",
     "description": "1-st part of \"Not highlighting 100 most common English words\" sentence"
   },
   "rateInfo2": {
-    "message": "最常用的英语单词。",
+    "message": "个英语单词。",
     "description": "2-nd part of \"Not highlighting 100 most common English words\" sentence"
   },
   "adjust": {
     "message": "更多设置..."
   },
   "vocabSizeTranslateDbg": {
-    "message": "您的词汇量：100 单词。"
+    "message": "你的词汇量：100 个词。"
   },
   "vocabSizeInfo1": {
-    "message": "您的词汇量：",
+    "message": "你的词汇量：",
     "description": "1-st part of \"Your vocabulary size: 100 words.\" sentence"
   },
   "vocabSizeInfo2": {
-    "message": "单词",
+    "message": "个词。",
     "description": "2-nd part of \"Your vocabulary size: 100 words.\" sentence"
   },
   "showVocab": {
-    "message": "显示词汇"
+    "message": "查看词汇表"
   },
   "saveVocab": {
-    "message": "导出词汇"
+    "message": "导出词汇表"
   },
   "loadVocab": {
-    "message": "导入词汇"
+    "message": "导入词汇表"
   },
   "tipInfo": {
-    "message": "若要添加新的表达方式到您的词汇，您可以使用鼠标悬停菜单或浏览器右键菜单（选择文本+右键点击）或此输入字段："
+    "message": "要把新表达加入词汇表，可以使用鼠标悬停菜单、浏览器右键菜单（选中文本后右键），也可以在这里输入："
   },
   "addErrorDupp": {
-    "message": "已经添加。"
+    "message": "已经添加过。"
   },
   "addErrorBad": {
     "message": "无法添加。"
@@ -61,39 +61,39 @@
     "message": "保存"
   },
   "enableWordsLabel": {
-    "message": "启用单词突出显示"
+    "message": "启用单词高亮"
   },
   "enableIdiomsLabel": {
-    "message": "启用表达方式突出显示"
+    "message": "启用习语/表达高亮"
   },
   "useQuotes": {
-    "message": "使用引号（而不是突出显示）"
+    "message": "使用引号（不使用高亮）"
   },
   "useText": {
-    "message": "使用文本突出显示"
+    "message": "使用文字颜色高亮"
   },
   "useBackground": {
-    "message": "使用背景突出显示"
+    "message": "使用背景色高亮"
   },
   "useBold": {
     "message": "使用粗体"
   },
   "enabledDescription": {
-    "message": "在所有网站突出显示，除了“跳过列表”中的网站。"
+    "message": "高亮所有网站，跳过“跳过列表”中的网站"
   },
   "disabledDescription": {
-    "message": "仅在“收藏列表”中的网站突出显示。"
+    "message": "只高亮“收藏列表”中的网站"
   },
   "addVerb": {
-    "message": "添加",
+    "message": "将",
     "description": "part of 'Add example.org to Favorites List' sentence"
   },
   "toVerb": {
-    "message": "至",
+    "message": "加入",
     "description": "part of 'Add example.org to Favorites List' sentence"
   },
   "addTranslateDbg": {
-    "message": "添加 [example.org] 至 [收藏列表]"
+    "message": "将 [example.org] 加入 [收藏列表]"
   },
   "addFavoritesLabel": {
     "message": "收藏列表"
@@ -102,31 +102,31 @@
     "message": "跳过列表"
   },
   "emptyListError": {
-    "message": "该列表是空的;）"
+    "message": "这个列表是空的。"
   },
   "adjustPopupHlHeader": {
-    "message": "调整突出显示的表达方法的弹出菜单"
+    "message": "调整已高亮表达的悬停菜单"
   },
   "rbNever": {
-    "message": "不显示弹出菜单"
+    "message": "不显示悬停菜单"
   },
   "rbKey": {
-    "message": "在鼠标悬停和[Ctrl]键时显示弹出菜单"
+    "message": "鼠标悬停并按住 Ctrl 时显示悬停菜单"
   },
   "rbAlways": {
-    "message": "在鼠标悬停时显示弹出菜单"
+    "message": "鼠标悬停时显示悬停菜单"
   },
   "adjustPopupOwHeader": {
-    "message": "调整不突出显示的单词的弹出菜单"
+    "message": "调整未高亮单词的悬停菜单"
   },
   "adjustOnlineDicts": {
-    "message": "调整悬停和右键菜单的在线词典"
+    "message": "调整悬停菜单和右键菜单中的在线词典"
   },
   "dictNameHeader": {
     "message": "词典名称："
   },
   "dictUrlHeader": {
-    "message": "词典查询网址："
+    "message": "词典查询 URL："
   },
   "testBtn": {
     "message": "测试"
@@ -135,15 +135,288 @@
     "message": "恢复默认值"
   },
   "adjustColorsHeader": {
-    "message": "调整突出显示颜色"
+    "message": "调整高亮颜色"
   },
   "importInfo": {
-    "message": "新的单词将被添加至您的当前词汇。"
+    "message": "新单词会合并到你当前的词汇表中。"
   },
   "selectFile": {
     "message": "选择文件..."
   },
   "switchModeLabel": {
     "message": "切换模式"
+  },
+  "advancedSettingsTitle": {
+    "message": "高级设置"
+  },
+  "debugStorageSet": {
+    "message": "调试：写入存储"
+  },
+  "debugStorageGet": {
+    "message": "调试：读取存储"
+  },
+  "debugManifestWarnings": {
+    "message": "查看 manifest 警告"
+  },
+  "backupSyncHeader": {
+    "message": "使用 Google Drive 备份和同步。"
+  },
+  "moreInfo": {
+    "message": "更多信息"
+  },
+  "syncNow": {
+    "message": "立即同步"
+  },
+  "stopSync": {
+    "message": "停止同步"
+  },
+  "adjustPronunciation": {
+    "message": "调整发音"
+  },
+  "enableAutoPronunciation": {
+    "message": "启用自动发音"
+  },
+  "wordExamplePrefix": {
+    "message": "英语单词示例："
+  },
+  "wordExampleWord": {
+    "message": "highlighted"
+  },
+  "idiomExamplePrefix": {
+    "message": "英语表达示例："
+  },
+  "idiomExampleText": {
+    "message": "highlighted English"
+  },
+  "syncError": {
+    "message": "错误：{0}"
+  },
+  "syncSynchronized": {
+    "message": "已同步。"
+  },
+  "durationDays": {
+    "message": "{0} 天"
+  },
+  "durationHours": {
+    "message": "{0} 小时"
+  },
+  "durationMinutes": {
+    "message": "{0} 分钟"
+  },
+  "durationSeconds": {
+    "message": "{0} 秒"
+  },
+  "syncLastSyncAgo": {
+    "message": "距离上次同步已过 {0}。"
+  },
+  "syncStarted": {
+    "message": "同步已开始..."
+  },
+  "importAddedInfo": {
+    "message": "已添加 {0} 个新词。"
+  },
+  "importSkippedInfo": {
+    "message": "已跳过 {0} 个已有词。"
+  },
+  "audioButton": {
+    "message": "发音"
+  },
+  "dictTranslateGoogle": {
+    "message": "在 Google 中翻译为 {0}"
+  },
+  "dictMerriamWebster": {
+    "message": "在 Merriam-Webster 中查询释义"
+  },
+  "dictGoogleDefinition": {
+    "message": "在 Google 中查询释义"
+  },
+  "dictGoogleImages": {
+    "message": "在 Google 中查看图片"
+  },
+  "skipListPageTitle": {
+    "message": "跳过列表 - 不高亮这些网站"
+  },
+  "favoritesListPageTitle": {
+    "message": "收藏列表 - 始终高亮这些网站"
+  },
+  "vocabularyPageTitle": {
+    "message": "你的词汇表"
+  },
+  "importPageTitle": {
+    "message": "Word Discoverer：导入词汇表"
+  },
+  "okButton": {
+    "message": "确定"
+  },
+  "helpPageTitle": {
+    "message": "Word Discoverer：说明"
+  },
+  "helpHeadingDescription": {
+    "message": "说明"
+  },
+  "helpDescription1": {
+    "message": "Word Discoverer 会在网页上高亮较少见的英语单词、习语和谚语。"
+  },
+  "helpDescription2": {
+    "message": "它帮助非英语母语者在浏览网页时发现新的英语表达。"
+  },
+  "helpDescription3": {
+    "message": "高亮低频词很有用，因为学习者在阅读时常会跳过“好像见过但不熟”的词，尤其是这些词并不影响理解整句话时。Word Discoverer 会在你遇到这些词的当下把它们标出来。"
+  },
+  "helpDescription4": {
+    "message": "Word Discoverer 永久免费、开源、无广告，并且在浏览器本地工作。"
+  },
+  "helpGithubLink": {
+    "message": "GitHub 页面"
+  },
+  "helpMainFeatures": {
+    "message": "主要功能"
+  },
+  "helpFeatureContext": {
+    "message": "和每日一词工具不同，Word Discoverer 会在你正在阅读的真实上下文中显示新词。"
+  },
+  "helpFeatureThreshold": {
+    "message": "你可以调整单词高亮的频率阈值，例如跳过最常见的 25% 英语单词，高亮剩下的词。习语和谚语目前作为一组启用或禁用。"
+  },
+  "helpFeatureModes": {
+    "message": "Word Discoverer 有两种工作模式："
+  },
+  "helpModeDefault": {
+    "message": "默认模式会高亮所有网站，但不会高亮“跳过列表”中的域名。"
+  },
+  "helpModeFavorites": {
+    "message": "收藏模式只高亮“收藏列表”中的域名。列表初始为空，你可以精确控制哪些网站启用高亮。"
+  },
+  "helpFeatureDictionary": {
+    "message": "内置词典大约包含 5 万个单词和 1600 个习语，例如 “bucket list”、“moral high ground”、“money laundering”。"
+  },
+  "helpFeatureVocabulary": {
+    "message": "如果你已经认识某个高亮词，可以把它加入个人词汇表。扩展会保存规范化形式，例如把 “dogs” 记为 “dog”，之后不再高亮它。"
+  },
+  "helpFeatureLookup": {
+    "message": "你可以从悬停弹窗或浏览器右键菜单打开词典查询；也可以继续搭配你喜欢的专用词典扩展使用。"
+  },
+  "helpFeaturePrivacy": {
+    "message": "Word Discoverer 尊重隐私。高亮逻辑在本地运行，不会发送网页文本或词汇数据；只有在你明确启用 Google Drive 同步时，词汇表才会同步到云端。"
+  },
+  "helpInterestingFactTitle": {
+    "message": "有趣事实"
+  },
+  "helpInterestingFact": {
+    "message": "大多数成年英语母语者大约认识 2 万到 3.5 万个词，所以个人词汇表可以长期增长，不容易“无词可加”。"
+  },
+  "helpUsageTitle": {
+    "message": "使用建议"
+  },
+  "helpUsageBackup": {
+    "message": "定期导出或同步你的个人词汇表。"
+  },
+  "helpUsageDictionaryExtension": {
+    "message": "如果你已经在使用专用词典扩展，可以关闭 Word Discoverer 的词典链接，只保留词汇表工作流。"
+  },
+  "helpChangelogTitle": {
+    "message": "更新记录"
+  },
+  "changelog100": {
+    "message": "初始版本。"
+  },
+  "changelog200Idioms": {
+    "message": "增加习语和多词表达高亮。"
+  },
+  "changelog200Color": {
+    "message": "支持用户选择高亮颜色。"
+  },
+  "changelog200Quotes": {
+    "message": "支持用引号标记单词，而不是颜色高亮。"
+  },
+  "changelog210Delete": {
+    "message": "用户可以从词汇表中删除单词。"
+  },
+  "changelog210Import": {
+    "message": "词汇导入改为合并到现有词汇表，而不是替换。"
+  },
+  "changelog210Punctuation": {
+    "message": "修复标点符号旁边单词的高亮问题。"
+  },
+  "changelog250Modes": {
+    "message": "增加默认开启和仅收藏网站两种模式。"
+  },
+  "changelog250Icon": {
+    "message": "当前标签页禁用扩展时，图标会变灰。"
+  },
+  "changelog250Idioms": {
+    "message": "增加更多习语。"
+  },
+  "changelog250Proverbs": {
+    "message": "增加谚语。"
+  },
+  "changelog260Dictionaries": {
+    "message": "选中文本后的右键菜单可根据界面语言打开多个在线词典。"
+  },
+  "changelog270Unhighlight": {
+    "message": "表达加入词汇表后，当前标签页会立即取消对应高亮。"
+  },
+  "changelog270MoreIdioms": {
+    "message": "增加更多习语，例如 “reinvent the wheel” 和 “tragedy of the commons”。"
+  },
+  "changelog280Hover": {
+    "message": "增加带词频指标的悬停弹窗。"
+  },
+  "changelog280Images": {
+    "message": "将同义词词典链接替换为 Google 图片搜索。"
+  },
+  "changelogBugFixes": {
+    "message": "修复问题。"
+  },
+  "changelog290NonHighlighted": {
+    "message": "为未高亮单词增加悬停弹窗。"
+  },
+  "changelog290Ctrl": {
+    "message": "增加按住 Ctrl 显示悬停弹窗的选项。"
+  },
+  "changelog290Dicts": {
+    "message": "支持自定义在线词典列表。"
+  },
+  "changelog290Idioms": {
+    "message": "修复习语高亮逻辑。"
+  },
+  "changelog212Mv3": {
+    "message": "迁移到 Manifest V3，并移除远程代码执行。"
+  },
+  "syncHelpPageTitle": {
+    "message": "Word Discoverer：同步说明"
+  },
+  "syncAdvantagesTitle": {
+    "message": "同步的好处"
+  },
+  "syncAdvBackup": {
+    "message": "自动备份词汇表到 Google Drive，减少手动备份的麻烦。"
+  },
+  "syncAdvCrossBrowser": {
+    "message": "在多个浏览器里的 Word Discoverer 之间同步词汇表。"
+  },
+  "syncDescriptionTitle": {
+    "message": "说明"
+  },
+  "syncDescription1": {
+    "message": "启用 Google Drive 同步后，每次添加或删除单词时，词汇表都会自动备份。自动同步最高每 30 分钟一次，你也可以点击“立即同步”手动同步。"
+  },
+  "syncDescription2": {
+    "message": "如果你在多个浏览器中使用 Word Discoverer，它们的词汇表会通过 Google Drive 同步。"
+  },
+  "syncDescription3": {
+    "message": "Word Discoverer 文件会保存在 Google Drive 根目录的 “Words Discoverer Sync” 文件夹中。你的词汇表在 “my_vocabulary.txt” 文件里。“.my_vocabulary.backup” 是技术文件，用来保存新增和删除记录，保证合并更安全。"
+  },
+  "syncDescription4": {
+    "message": "要停止同步，请在启用同步后点击“停止同步”按钮。"
+  },
+  "syncDescription5": {
+    "message": "如果扩展图标显示红色 “err” 标记，说明同步因为错误停止了。可以再次点击“立即同步”；如果仍然失败，尝试重启浏览器。"
+  },
+  "syncDescription6": {
+    "message": "如果只想在 Google Drive 中查看词汇表而不下载，最方便的方法是在文件菜单中使用“预览”。"
+  },
+  "syncScreenshotAlt": {
+    "message": "Google Drive 预览截图"
   }
 }

@@ -106,16 +106,39 @@ function make_hl_style(hl_params) {
 
 
 function localizeHtmlPage() {
-    //Localize by replacing __MSG_***__ meta tags
-    var objects = document.getElementsByTagName('html');
-    for (var j = 0; j < objects.length; j++) {
-        var obj = objects[j];
-        var valStrH = obj.innerHTML.toString();
-        var valNewH = valStrH.replace(/__MSG_(\w+)__/g, function(match, v1) {
-            return v1 ? chrome.i18n.getMessage(v1) : "";
+    function msg(key) {
+        return key ? chrome.i18n.getMessage(key) : "";
+    }
+    function replaceTokens(text) {
+        return text.replace(/__MSG_(\w+)__/g, function(match, key) {
+            var translated = msg(key);
+            return translated || match;
         });
-        if(valNewH != valStrH) {
-            obj.innerHTML = valNewH;
+    }
+
+    document.querySelectorAll("[data-i18n]").forEach(function(node) {
+        node.textContent = msg(node.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach(function(node) {
+        node.innerHTML = msg(node.getAttribute("data-i18n-html"));
+    });
+
+    ["title", "placeholder", "value", "aria-label", "alt"].forEach(function(attr) {
+        document.querySelectorAll("[data-i18n-" + attr + "]").forEach(function(node) {
+            node.setAttribute(attr, msg(node.getAttribute("data-i18n-" + attr)));
+        });
+    });
+
+    var walker = document.createTreeWalker(document.documentElement, NodeFilter.SHOW_TEXT);
+    var nodes = [];
+    while (walker.nextNode()) {
+        nodes.push(walker.currentNode);
+    }
+    for (var i = 0; i < nodes.length; i++) {
+        var oldText = nodes[i].nodeValue;
+        var newText = replaceTokens(oldText);
+        if (newText !== oldText) {
+            nodes[i].nodeValue = newText;
         }
     }
 }
