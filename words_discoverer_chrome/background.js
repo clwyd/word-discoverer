@@ -1,5 +1,4 @@
-var gapi_loaded = false;
-var gapi_inited = false;
+var gdrive_token = null;
 
 //TODO check chrome.runtime.lastError for all storage.local operations
 
@@ -27,15 +26,11 @@ function do_load_dictionary(file_text) {
 
 
 function load_eng_dictionary() {
-    var file_path = chrome.extension.getURL("eng_dict.txt");
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == XMLHttpRequest.DONE) {
-            do_load_dictionary(xhr.responseText);
-        }
-    }
-    xhr.open('GET', file_path, true);
-    xhr.send(null);
+    fetch(chrome.runtime.getURL("eng_dict.txt")).then(function (response) {
+        return response.text();
+    }).then(do_load_dictionary).catch(function (error) {
+        console.error("Unable to load English dictionary", error);
+    });
 }
 
 
@@ -60,15 +55,12 @@ function do_load_idioms(file_text) {
 
 
 function load_idioms() {
-    file_path = chrome.extension.getURL("eng_idioms.txt");
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == XMLHttpRequest.DONE) {
-            do_load_idioms(xhr.responseText);
-        }
-    }
-    xhr.open('GET', file_path, true);
-    xhr.send(null);
+    var file_path = chrome.runtime.getURL("eng_idioms.txt");
+    fetch(file_path).then(function (response) {
+        return response.text();
+    }).then(do_load_idioms).catch(function (error) {
+        console.error("Unable to load English idioms", error);
+    });
 }
 
 
@@ -79,44 +71,49 @@ function report_sync_failure(error_msg) {
 }
 
 
-function load_script(url, callback_func) {
-    var request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (request.readyState !== 4)
-            return;
-        if (request.status !== 200)
-            return;
-        eval(request.responseText);
-        callback_func();
-    };
-    request.open('GET', url);
-    request.send();
-}
-
-
 function authorize_user(interactive_authorization) {
     chrome.identity.getAuthToken({interactive: interactive_authorization}, function (token) {
-        if (token === undefined) {
-            report_sync_failure('Unable to get oauth token');
+        if (chrome.runtime.lastError || token === undefined) {
+            var msg = chrome.runtime.lastError ? chrome.runtime.lastError.message : 'Unable to get oauth token';
+            report_sync_failure(msg);
         } else {
-            gapi.client.setToken({access_token: token});
+            gdrive_token = token;
             sync_user_vocabularies();
         }
     });
 }
 
 
-function transform_key(src_key) {
-    var dc = window.atob(src_key);
-    dc = dc.substring(3);
-    dc = dc.substring(0, dc.length - 6);
-    return dc;
-}
+function drive_request(req_params, success_cb) {
+    if (!gdrive_token) {
+        report_sync_failure('Unable to call Google Drive without oauth token');
+        return;
+    }
 
+    var headers = new Headers({"Authorization": "Bearer " + gdrive_token});
+    var options = {method: req_params.method || "GET", headers: headers};
+    if (typeof req_params.body !== 'undefined') {
+        if (typeof req_params.body === "string") {
+            headers.set("Content-Type", "text/plain;charset=utf-8");
+            options.body = req_params.body;
+        } else {
+            headers.set("Content-Type", "application/json;charset=utf-8");
+            options.body = JSON.stringify(req_params.body);
+        }
+    }
 
-function generate_key() {
-    var protokey = 'b2ZCQUl6YVN5Q2hqM2xvZkJPWnV2TUt2TGNCSlVaa0RDTUhZa25NWktBa25NWktB';
-    return transform_key(protokey);
+    fetch(req_params.path, options).then(function (response) {
+        return response.text().then(function (body) {
+            var result = undefined;
+            var contentType = response.headers.get("content-type") || "";
+            if (body && contentType.indexOf("application/json") !== -1) {
+                result = JSON.parse(body);
+            }
+            success_cb({status: response.status, result: result, body: body});
+        });
+    }).catch(function (error) {
+        report_sync_failure('Google Drive request failed: ' + error);
+    });
 }
 
 
@@ -179,7 +176,7 @@ function parse_vocabulary(text) {
 function create_new_dir(dir_name, success_cb) {
     var body = {"name": dir_name, "mimeType": "application/vnd.google-apps.folder", "appProperties": {"wdfile": '1'}};
     var req_params = {'path': 'https://www.googleapis.com/drive/v3/files/', 'method': 'POST', 'body': body};
-    gapi.client.request(req_params).then(function (jsonResp, rawResp) {
+    drive_request(req_params, function (jsonResp) {
         if (jsonResp.status == 200) {
             success_cb(jsonResp.result.id);
         } else {
@@ -192,7 +189,7 @@ function create_new_dir(dir_name, success_cb) {
 function create_new_file(fname, parent_dir_id, success_cb) {
     var body = {"name": fname, "parents": [parent_dir_id], "appProperties": {"wdfile": '1'}, "mimeType": "text/plain"};
     var req_params = {'path': 'https://www.googleapis.com/drive/v3/files', 'method': 'POST', 'body': body};
-    gapi.client.request(req_params).then(function (jsonResp, rawResp) {
+    drive_request(req_params, function (jsonResp) {
         if (jsonResp.status == 200) {
             success_cb(jsonResp.result.id);
         } else {
@@ -208,7 +205,7 @@ function upload_file_content(file_id, file_content, success_cb) {
         'method': 'PATCH',
         'body': file_content
     };
-    gapi.client.request(req_params).then(function (jsonResp, rawResp) {
+    drive_request(req_params, function (jsonResp) {
         if (jsonResp.status == 200) {
             success_cb();
         } else {
@@ -221,7 +218,7 @@ function upload_file_content(file_id, file_content, success_cb) {
 function fetch_file_content(file_id, success_cb) {
     // https://developers.google.com/drive/v3/web/manage-downloads
     var full_query_url = 'https://www.googleapis.com/drive/v3/files/' + file_id + '?alt=media';
-    gapi.client.request({'path': full_query_url, 'method': 'GET'}).then(function (jsonResp, rawResp) {
+    drive_request({'path': full_query_url, 'method': 'GET'}, function (jsonResp) {
         if (jsonResp.status != 200) {
             report_sync_failure('Bad status: ' + jsonResp.status + ' for getting content of file: ' + file_id);
             return;
@@ -235,7 +232,7 @@ function fetch_file_content(file_id, success_cb) {
 function find_gdrive_id(query, found_cb, not_found_cb) {
     // generic function to find single object id
     var full_query_url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(query);
-    gapi.client.request({'path': full_query_url, 'method': 'GET'}).then(function (jsonResp, rawResp) {
+    drive_request({'path': full_query_url, 'method': 'GET'}, function (jsonResp) {
         if (jsonResp.status != 200) {
             report_sync_failure('Bad status: ' + jsonResp.status + ' for query: ' + query);
             return;
@@ -364,39 +361,9 @@ function sync_user_vocabularies() {
 }
 
 
-function init_gapi(interactive_authorization) {
-    gapikey = generate_key();
-    init_params = {apiKey: gapikey};
-    gapi.client.init(init_params).then(function () {
-        gapi_inited = true;
-        authorize_user(interactive_authorization);
-    }, function (reject_reason) {
-        var error_msg = 'Unable to init client. Reject reason: ' + reject_reason;
-        console.error(error_msg);
-        report_sync_failure(error_msg);
-    });
-}
-
-
-function load_and_init_gapi(interactive_authorization) {
-    load_script('https://apis.google.com/js/api.js', function () {
-        gapi.load('client', function () {
-            gapi_loaded = true;
-            init_gapi(interactive_authorization);
-        });
-    });
-}
-
-
 function start_sync_sequence(interactive_authorization) {
     chrome.storage.local.set({"wd_last_sync_error": 'Unknown sync problem'}, function () {
-        if (!gapi_loaded) {
-            load_and_init_gapi(interactive_authorization);
-        } else if (!gapi_inited) {
-            init_gapi(interactive_authorization);
-        } else {
-            authorize_user(interactive_authorization);
-        }
+        authorize_user(interactive_authorization);
     });
 }
 
@@ -404,7 +371,7 @@ function start_sync_sequence(interactive_authorization) {
 function initialize_extension() {
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         if (request.wdm_request == "hostname") {
-            tab_url = sender.tab.url;
+            var tab_url = sender.tab.url;
             var url = new URL(tab_url);
             var domain = url.hostname;
             sendResponse({wdm_hostname: domain});
@@ -416,17 +383,17 @@ function initialize_extension() {
         } else if (request.wdm_verdict) {
             if (request.wdm_verdict == "highlight") {
                 chrome.storage.local.get(['wd_gd_sync_enabled', 'wd_last_sync_error'], function (result) {
-                    chrome.browserAction.setIcon({path: "result48.png", tabId: sender.tab.id}, function () {
+                    chrome.action.setIcon({path: "result48.png", tabId: sender.tab.id}, function () {
                         if (result.wd_gd_sync_enabled) {
                             if (result.wd_last_sync_error == null) {
-                                chrome.browserAction.setBadgeText({text: 'sync', tabId: sender.tab.id});
-                                chrome.browserAction.setBadgeBackgroundColor({
+                                chrome.action.setBadgeText({text: 'sync', tabId: sender.tab.id});
+                                chrome.action.setBadgeBackgroundColor({
                                     color: [25, 137, 0, 255],
                                     tabId: sender.tab.id
                                 });
                             } else {
-                                chrome.browserAction.setBadgeText({text: 'err', tabId: sender.tab.id});
-                                chrome.browserAction.setBadgeBackgroundColor({
+                                chrome.action.setBadgeText({text: 'err', tabId: sender.tab.id});
+                                chrome.action.setBadgeBackgroundColor({
                                     color: [137, 0, 0, 255],
                                     tabId: sender.tab.id
                                 });
@@ -435,9 +402,9 @@ function initialize_extension() {
                     });
                 });
             } else if (request.wdm_verdict == "keyboard") {
-                chrome.browserAction.setIcon({path: "no_dynamic.png", tabId: sender.tab.id});
+                chrome.action.setIcon({path: "no_dynamic.png", tabId: sender.tab.id});
             } else {
-                chrome.browserAction.setIcon({path: "result48_gray.png", tabId: sender.tab.id});
+                chrome.action.setIcon({path: "result48_gray.png", tabId: sender.tab.id});
             }
         } else if (request.wdm_new_tab_url) {
             var fullUrl = request.wdm_new_tab_url;
@@ -517,7 +484,7 @@ function initialize_extension() {
 
 
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-        if (request.type = "tts_speak") {
+        if (request.type === "tts_speak") {
             if (!!request.word && typeof request.word === "string") {
                 chrome.tts.speak(request.word, {lang: "en", gender: "male"})
             }

@@ -336,8 +336,7 @@ function doHighlightText(textNodes) {
 }
 
 
-function onNodeInserted(event) {
-    var inobj = event.target;
+function processInsertedNode(inobj) {
     if (!inobj)
         return;
     var classattr = null;
@@ -353,6 +352,19 @@ function onNodeInserted(event) {
         var textNodes = textNodesUnder(inobj);
         doHighlightText(textNodes);
     }
+}
+
+
+function observeInsertedNodes(root) {
+    var observer = new MutationObserver(function (mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+            var nodes = mutations[i].addedNodes;
+            for (var j = 0; j < nodes.length; j++) {
+                processInsertedNode(nodes[j]);
+            }
+        }
+    });
+    observer.observe(root, {childList: true, subtree: true});
 }
 
 
@@ -529,9 +541,11 @@ function initForPage() {
 
             var bubbleDOM = create_bubble();
             document.body.appendChild(bubbleDOM);
-            document.addEventListener('mousedown', hideBubble(true), false);
+            document.addEventListener('mousedown', function () {
+                hideBubble(true);
+            }, false);
             document.addEventListener('mousemove', processMouse, false);
-            document.addEventListener("DOMNodeInserted", onNodeInserted, false);
+            observeInsertedNodes(document.body);
             window.addEventListener('scroll', function () {
                 node_to_render_id = null;
                 hideBubble(true);
@@ -544,4 +558,3 @@ function initForPage() {
 document.addEventListener("DOMContentLoaded", function (event) {
     initForPage();
 });
-

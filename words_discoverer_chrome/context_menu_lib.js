@@ -187,10 +187,7 @@ function showDefinition(dictUrl, text) {
 }
 
 function createDictionaryEntry(title, dictUrl, entryId) {
-    chrome.contextMenus.create({"title": title, "contexts":["selection"], "id": entryId, "onclick": function(info, tab) {
-        var word = info.selectionText;
-        showDefinition(dictUrl, word);
-    }}); 
+    chrome.contextMenus.create({"title": title, "contexts":["selection"], "id": entryId});
 }
 
 function context_handle_add_result(report, lemma) {
@@ -203,6 +200,33 @@ function onClickHandler(info, tab) {
     var word = info.selectionText;
     add_lexeme(word, context_handle_add_result);
 };
+
+
+function contextDictionaryHandler(info) {
+    var entryId = String(info.menuItemId || "");
+    if (!entryId.startsWith("wd_define_")) {
+        return;
+    }
+    var dictNo = parseInt(entryId.split("_")[2], 10);
+    if (isNaN(dictNo)) {
+        return;
+    }
+    chrome.storage.local.get(["wd_online_dicts"], function(result) {
+        var dictPairs = result.wd_online_dicts || make_default_online_dicts();
+        if (dictNo >= 0 && dictNo < dictPairs.length) {
+            showDefinition(dictPairs[dictNo].url, info.selectionText);
+        }
+    });
+}
+
+
+function handleContextMenuClick(info, tab) {
+    if (info.menuItemId === "vocab_select_add") {
+        onClickHandler(info, tab);
+    } else {
+        contextDictionaryHandler(info);
+    }
+}
 
 
 function make_default_online_dicts() {
@@ -223,10 +247,15 @@ function make_default_online_dicts() {
 function initContextMenus(dictPairs) {
     chrome.contextMenus.removeAll(function() {
         var title = chrome.i18n.getMessage("menuItem");
-        chrome.contextMenus.create({"title": title, "contexts":["selection"], "id": "vocab_select_add", "onclick": onClickHandler}); 
+        chrome.contextMenus.create({"title": title, "contexts":["selection"], "id": "vocab_select_add"});
         chrome.contextMenus.create({type: 'separator', "contexts":["selection"], "id": "wd_separator_id"});
         for (var i = 0; i < dictPairs.length; ++i) {
             createDictionaryEntry(dictPairs[i].title, dictPairs[i].url, "wd_define_" + i);
         }
     });
+}
+
+
+if (typeof window === "undefined" && chrome.contextMenus && chrome.contextMenus.onClicked) {
+    chrome.contextMenus.onClicked.addListener(handleContextMenuClick);
 }
