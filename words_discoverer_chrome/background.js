@@ -367,7 +367,7 @@ function start_sync_sequence(interactive_authorization) {
 }
 
 
-function open_lookup_popup(url, sender) {
+function open_lookup_popup(url, sender, position) {
     var popupOptions = {
         url: url,
         type: "popup",
@@ -375,6 +375,12 @@ function open_lookup_popup(url, sender) {
         height: 640,
         focused: true
     };
+    if (position && typeof position.left === "number" && typeof position.top === "number") {
+        popupOptions.left = Math.max(0, position.left);
+        popupOptions.top = Math.max(0, position.top);
+        chrome.windows.create(popupOptions);
+        return;
+    }
     if (sender && sender.tab && typeof sender.tab.windowId === "number") {
         chrome.windows.get(sender.tab.windowId, function (win) {
             if (win) {
@@ -432,7 +438,7 @@ function initialize_extension() {
             chrome.tabs.create({'url': fullUrl}, function (tab) {
             });
         } else if (request.wdm_lookup_popup_url) {
-            open_lookup_popup(request.wdm_lookup_popup_url, sender);
+            open_lookup_popup(request.wdm_lookup_popup_url, sender, request.wdm_popup_position);
         } else if (request.wdm_request == "gd_sync") {
             start_sync_sequence(request.interactive_mode);
         }

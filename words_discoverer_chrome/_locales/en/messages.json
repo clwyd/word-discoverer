@@ -37,13 +37,19 @@
     "description": "2-nd part of \"Your vocabulary size: 100 words.\" sentence"
   },
   "showVocab": {
-    "message": "Show Vocabulary"
+    "message": "Manage Local Vocabulary"
   },
   "saveVocab": {
     "message": "Export Vocabulary"
   },
   "loadVocab": {
     "message": "Import Vocabulary"
+  },
+  "manageVocab": {
+    "message": "Manage Local Vocabulary"
+  },
+  "vocabularyToolsHeader": {
+    "message": "Vocabulary tools"
   },
   "tipInfo": {
     "message": "To add a new expression to your vocabulary you can use mouse hover menu or browser context menu (select text + right click) or this input field:"
@@ -139,6 +145,9 @@
   },
   "importInfo": {
     "message": "New words will be added to your current vocabulary."
+  },
+  "importNoFile": {
+    "message": "Select a vocabulary file first."
   },
   "selectFile": {
     "message": "Select File..."
@@ -240,7 +249,7 @@
     "message": "Favorites List - Always highlight these sites"
   },
   "vocabularyPageTitle": {
-    "message": "Your Vocabulary"
+    "message": "Local Vocabulary"
   },
   "vocabSearchPlaceholder": {
     "message": "Search vocabulary"

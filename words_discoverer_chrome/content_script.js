@@ -21,6 +21,7 @@ var word_re = new RegExp("^[a-z][a-z]*$");
 var function_key_is_pressed = false;
 var rendered_node_id = null;
 var node_to_render_id = null;
+var node_to_render_point = null;
 var inserted_node_queue = [];
 var inserted_node_flush_timer = null;
 
@@ -110,10 +111,24 @@ function renderBubble() {
     bubbleFreq.textContent = prcntFreq ? prcntFreq + "%" : "n/a";
     bubbleFreq.style.backgroundColor = getHeatColorPoint(prcntFreq);
     current_lexeme = wdSpanText;
-    var bcr = node_to_render.getBoundingClientRect();
-    bubbleDOM.style.top = bcr.bottom + 'px';
-    bubbleDOM.style.left = Math.max(5, Math.floor((bcr.left + bcr.right) / 2) - 100) + 'px';
     bubbleDOM.style.display = 'block';
+    var point = node_to_render_point;
+    if (!point) {
+        var bcr = node_to_render.getBoundingClientRect();
+        point = {x: Math.floor((bcr.left + bcr.right) / 2), y: bcr.bottom};
+    }
+    var width = bubbleDOM.offsetWidth || 200;
+    var height = bubbleDOM.offsetHeight || 120;
+    var left = point.x + 12;
+    if (left + width + 8 > window.innerWidth) {
+        left = point.x - width - 12;
+    }
+    var top = point.y + 12;
+    if (top + height + 8 > window.innerHeight) {
+        top = point.y - height - 12;
+    }
+    bubbleDOM.style.left = Math.max(5, left) + 'px';
+    bubbleDOM.style.top = Math.max(5, top) + 'px';
     rendered_node_id = node_to_render_id;
 
     if (wd_enable_tts) {
@@ -133,6 +148,7 @@ function hideBubble(force) {
 
 function process_hl_leave() {
     node_to_render_id = null;
+    node_to_render_point = null;
     setTimeout(function () {
         hideBubble(false);
     }, 100);
@@ -162,6 +178,7 @@ function processPointerOver(e) {
         return;
     }
     node_to_render_id = hitNode.id;
+    node_to_render_point = {x: e.clientX, y: e.clientY};
     setTimeout(function () {
         renderBubble();
     }, 200);
@@ -514,7 +531,10 @@ function create_bubble() {
             var target = e.target;
             var dictUrl = target.getAttribute('wdDictRefUrl');
             var newTabUrl = get_dict_definition_url(dictUrl, current_lexeme);
-            chrome.runtime.sendMessage({wdm_lookup_popup_url: newTabUrl});
+            chrome.runtime.sendMessage({
+                wdm_lookup_popup_url: newTabUrl,
+                wdm_popup_position: {left: e.screenX + 12, top: e.screenY + 12}
+            });
         });
         bubbleDOM.appendChild(dictButton);
     }

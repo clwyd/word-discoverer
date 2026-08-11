@@ -160,6 +160,128 @@
         font-size: 14px;
         margin: 4px 20px;
     }
+    :root {
+        color-scheme: light;
+        --bg: #f5f7fb;
+        --surface: #ffffff;
+        --surface-strong: #eef3f8;
+        --text: #16202a;
+        --muted: #627084;
+        --line: #d8e0ea;
+        --accent: #117c73;
+        --accent-strong: #0b5f59;
+        --danger: #b42318;
+    }
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+    }
+    .page {
+        width: min(900px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: 24px 0 36px;
+    }
+    fieldset {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 16px;
+        margin: 0;
+    }
+    .smallHeader {
+        display: inline-block;
+        color: var(--text);
+        font-size: 18px;
+        margin: 0 0 10px;
+    }
+    .wdInfo,
+    .cbLabel,
+    .cbHeaderLabel {
+        color: var(--muted);
+    }
+    .buttonRow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
+    .longButton,
+    .shortButton {
+        min-height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+        font-weight: 600;
+        padding: 0 12px;
+        margin: 0;
+        cursor: pointer;
+        width: auto;
+    }
+    .longButton.primary {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: #ffffff;
+    }
+    .longButton:hover,
+    .shortButton:hover {
+        background: var(--surface-strong);
+    }
+    .longButton.primary:hover {
+        background: var(--accent-strong);
+    }
+    .longRedButton {
+        min-height: 34px;
+        border: 1px solid #f2c8c4;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--danger);
+        padding: 0 12px;
+        margin: 0;
+        width: auto;
+    }
+    input[type=text] {
+        height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text);
+        padding: 0 10px;
+    }
+    .vocabTools {
+        display: grid;
+        gap: 10px;
+    }
+    .vocabCount {
+        color: var(--muted);
+        margin-left: 8px;
+    }
+    .existingDictName,
+    .existingDictUrl {
+        background: var(--surface-strong);
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        padding: 0 8px;
+    }
+    @media (max-width: 720px) {
+        .dictNameHeader,
+        .dictUrlHeader,
+        .existingDictName,
+        .existingDictUrl,
+        .dictAddName,
+        .dictAddUrl {
+            display: block;
+            width: 100%;
+        }
+    }
     </style>
     <title data-i18n="advancedSettingsTitle">Advanced Settings</title>
     <script src="common_lib.js"></script>
@@ -168,6 +290,7 @@
     <script src="adjust.js"></script>
   </head>
   <body>
+  <main class="page">
   <div id="debugControl" class="debugControlBlock">
     <input type="text" id="setToStorageKey" class="dictAddUrl"><input type="text" id="setToStorageVal" class="dictAddUrl"><button class="longButton" id="setToStorageBtn">__MSG_debugStorageSet__</button>
     <br>
@@ -175,11 +298,16 @@
     <br>
     <button class="longButton" id="testManifestWarningsBtn">__MSG_debugManifestWarnings__</button>
   </div>
-  <fieldset>
-    <button class="longButton" id="saveVocab">__MSG_saveVocab__</button>
-    <button class="longButton" id="loadVocab">__MSG_loadVocab__</button>
-    <br>
-    <br>
+  <fieldset class="vocabTools">
+    <div>
+      <span class="smallHeader" data-i18n="vocabularyToolsHeader">Vocabulary tools</span>
+      <span class="vocabCount" id="vocabToolsCount"></span>
+    </div>
+    <div class="buttonRow">
+      <button class="longButton primary" id="manageVocab" data-i18n="manageVocab">Manage Vocabulary</button>
+      <button class="longButton" id="loadVocab" data-i18n="loadVocab">Import Vocabulary</button>
+      <button class="longButton" id="saveVocab" data-i18n="saveVocab">Export Vocabulary</button>
+    </div>
   </fieldset>
   <br>
   <fieldset>
@@ -308,5 +436,6 @@
       <button class="longButton" id="saveVisuals">__MSG_saveVisuals__</button>
     </fieldset>
   </div>
+  </main>
   </body>
 </html>

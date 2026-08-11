@@ -134,13 +134,14 @@ function process_set_dbg() {
 
 function process_export() {
     chrome.storage.local.get(['wd_user_vocabulary'], function (result) {
-        var user_vocabulary = result.wd_user_vocabulary;
-        keys = []
+        var user_vocabulary = result.wd_user_vocabulary || {};
+        var keys = [];
         for (var key in user_vocabulary) {
             if (user_vocabulary.hasOwnProperty(key)) {
                 keys.push(key);
             }
         }
+        keys.sort();
         var file_content = keys.join('\r\n')
         var blob = new Blob([file_content], {type: "text/plain;charset=utf-8"});
         saveAs(blob, "my_vocabulary.txt", true);
@@ -148,8 +149,23 @@ function process_export() {
 }
 
 
+function process_manage_vocab() {
+    chrome.tabs.create({'url': chrome.runtime.getURL('display.html')}, function (tab) {
+    });
+}
+
+
 function process_import() {
     chrome.tabs.create({'url': chrome.runtime.getURL('import.html')}, function (tab) {
+    });
+}
+
+
+function display_vocabulary_tools_count() {
+    chrome.storage.local.get(['wd_user_vocabulary'], function (result) {
+        var user_vocabulary = result.wd_user_vocabulary || {};
+        var entryCountFormat = chrome.i18n.getMessage("vocabEntryCount") || "{0} entries";
+        document.getElementById("vocabToolsCount").textContent = spformat(entryCountFormat, Object.keys(user_vocabulary).length);
     });
 }
 
@@ -419,6 +435,7 @@ function process_display() {
 
             document.getElementById("saveVocab").addEventListener("click", process_export);
             document.getElementById("loadVocab").addEventListener("click", process_import);
+            document.getElementById("manageVocab").addEventListener("click", process_manage_vocab);
 
             document.getElementById("getFromStorageBtn").addEventListener("click", process_get_dbg);
             document.getElementById("setToStorageBtn").addEventListener("click", process_set_dbg);
@@ -447,6 +464,7 @@ function process_display() {
             });
 
             display_sync_interface();
+            display_vocabulary_tools_count();
             show_internal_state();
         });
 

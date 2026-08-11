@@ -15,7 +15,7 @@ function parse_vocabulary(text) {
 
 function add_new_words(new_words) {
     chrome.storage.local.get(['wd_user_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'], function(result) {
-        var user_vocabulary = result.wd_user_vocabulary;
+        var user_vocabulary = result.wd_user_vocabulary || {};
         var wd_user_vocab_added = result.wd_user_vocab_added;
         var wd_user_vocab_deleted = result.wd_user_vocab_deleted;
         var num_added = 0;
@@ -41,6 +41,7 @@ function add_new_words(new_words) {
         var num_skipped = new_words.length - num_added;
         document.getElementById("addedInfo").textContent = spformat(chrome.i18n.getMessage("importAddedInfo"), num_added);
         document.getElementById("skippedInfo").textContent = spformat(chrome.i18n.getMessage("importSkippedInfo"), num_skipped);
+        document.getElementById("openVocabAfterImport").style.display = "inline-block";
     });
 }
 
@@ -51,9 +52,13 @@ function process_change() {
 }
 
 function process_submit() {
-    //TODO add a radio button with two options: 1. merge vocabulary [default]; 2. replace vocabulary
     var inputElem = document.getElementById("doLoadVocab");
     var file = inputElem.files[0];
+    if (!file) {
+        document.getElementById("addedInfo").textContent = chrome.i18n.getMessage("importNoFile") || "Select a vocabulary file first.";
+        document.getElementById("skippedInfo").textContent = "";
+        return;
+    }
     var reader = new FileReader();
     reader.onload = function(e) {
         var new_words = parse_vocabulary(reader.result);
@@ -67,6 +72,9 @@ function init_controls() {
         localizeHtmlPage();
         document.getElementById("vocabSubmit").addEventListener("click", process_submit);
         document.getElementById("doLoadVocab").addEventListener("change", process_change);
+        document.getElementById("openVocabAfterImport").addEventListener("click", function() {
+            chrome.tabs.create({'url': chrome.runtime.getURL('display.html')});
+        });
     }
 }
 

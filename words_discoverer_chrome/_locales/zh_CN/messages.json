@@ -37,13 +37,19 @@
     "description": "2-nd part of \"Your vocabulary size: 100 words.\" sentence"
   },
   "showVocab": {
-    "message": "查看词汇表"
+    "message": "管理本地词汇表"
   },
   "saveVocab": {
     "message": "导出词汇表"
   },
   "loadVocab": {
     "message": "导入词汇表"
+  },
+  "manageVocab": {
+    "message": "管理本地词汇表"
+  },
+  "vocabularyToolsHeader": {
+    "message": "词汇表工具"
   },
   "tipInfo": {
     "message": "要把新表达加入词汇表，可以使用鼠标悬停菜单、浏览器右键菜单（选中文本后右键），也可以在这里输入："
@@ -139,6 +145,9 @@
   },
   "importInfo": {
     "message": "新单词会合并到你当前的词汇表中。"
+  },
+  "importNoFile": {
+    "message": "请先选择词汇表文件。"
   },
   "selectFile": {
     "message": "选择文件..."
@@ -240,7 +249,7 @@
     "message": "收藏列表 - 始终高亮这些网站"
   },
   "vocabularyPageTitle": {
-    "message": "你的词汇表"
+    "message": "本地词汇表"
   },
   "vocabSearchPlaceholder": {
     "message": "搜索词汇"

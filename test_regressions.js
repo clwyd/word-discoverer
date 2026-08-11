@@ -85,6 +85,10 @@ async function runBackgroundLib() {
     assert.strictEqual(sandbox.createdWindow.url, "https://example.test/word");
     assert.strictEqual(sandbox.createdWindow.type, "popup");
     assert.strictEqual(sandbox.createdWindow.width, 760);
+
+    sandbox.open_lookup_popup("https://example.test/word", {}, {left: 320, top: 240});
+    assert.strictEqual(sandbox.createdWindow.left, 320);
+    assert.strictEqual(sandbox.createdWindow.top, 240);
 }
 
 function runVocabListPage() {
@@ -208,11 +212,16 @@ function runVocabListPage() {
     const contentScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/content_script.js"), "utf8");
     assert.match(contentScript, /bubbleDOM\.addEventListener\("mousedown"[\s\S]*?e\.stopPropagation\(\);/);
     assert.match(contentScript, /wdm_lookup_popup_url/);
+    assert.match(contentScript, /wdm_popup_position/);
     assert.doesNotMatch(contentScript, /addEventListener\('mousemove'/);
 
     const listScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/black_white.js"), "utf8");
     assert.match(listScript, /function render_vocab_page\(\)/);
     assert.match(listScript, /document\.createElement\("details"\)/);
+
+    const manifest = JSON.parse(fs.readFileSync(path.join(root, "words_discoverer_chrome/manifest.json"), "utf8"));
+    assert.strictEqual(manifest.version, "2.12.5");
+    assert.strictEqual(manifest.options_ui.page, "adjust.html");
 
     runVocabListPage();
     await runBackgroundLib();

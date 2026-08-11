@@ -4,7 +4,7 @@
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
-  "version": "2.12.4",
+  "version": "2.12.5",
   "icons": {
     "48": "result48.png",
     "128": "icon_128.png"
@@ -15,6 +15,10 @@
       "48": "result48.png",
       "128": "icon_128.png"
     }
+  },
+  "options_ui": {
+    "page": "adjust.html",
+    "open_in_tab": true
   },
   "author": "Dmitry Ignatovich",
   "permissions": [

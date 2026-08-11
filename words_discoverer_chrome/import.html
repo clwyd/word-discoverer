@@ -3,38 +3,78 @@
   <head>
     <meta charset="utf-8">
     <style>
-    body {
-        background-color: rgb(255,248,220);
+    :root {
+        color-scheme: light;
+        --bg: #f5f7fb;
+        --surface: #ffffff;
+        --surface-strong: #eef3f8;
+        --text: #16202a;
+        --muted: #627084;
+        --line: #d8e0ea;
+        --accent: #117c73;
+        --accent-strong: #0b5f59;
     }
-    fieldset {
-        background-color: orange;
-        padding: 8px;
-        border: 0;
-        width: 500px;
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+    }
+    .page {
+        width: min(680px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: 24px 0 36px;
+    }
+    .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 16px;
+    }
+    h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        line-height: 1.2;
     }
     input[type="file"] {
         display: none;
     }
     .infoMsg {
-        padding: 4px;
-        font-size: 16px;
+        display: block;
+        color: var(--muted);
+        margin: 8px 0;
     }
     .longButton {
-        width: 180px;
-        background-color: #4CAF50; /* Green */
-        border: none;
-        color: white;
-        padding: 4px 6px;
-        text-decoration: none;
+        min-height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text);
+        padding: 0 12px;
         text-align: center;
         display: inline-block;
-        font-size: 14px;
-        margin: 4px 2px;
-        transition-duration: 0.4s;
+        font: inherit;
+        font-weight: 600;
+        margin: 4px 4px 4px 0;
         cursor: pointer;
     }
     .longButton:hover {
-        background-color: #3e8e41;
+        background: var(--surface-strong);
+    }
+    .primary {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: #ffffff;
+    }
+    .primary:hover {
+        background: var(--accent-strong);
+    }
+    #openVocabAfterImport {
+        display: none;
     }
     </style>
     <title data-i18n="importPageTitle">Word Discoverer: Import vocabulary</title>
@@ -42,18 +82,18 @@
     <script src="import.js"></script>
   </head>
   <body>
-    <fieldset>
-    <span class="infoMsg">__MSG_importInfo__</span>
-    <br>
-    <br>
-    <label for="doLoadVocab" class="longButton">__MSG_selectFile__</label>
-    <input id="doLoadVocab" type="file"/>
-    <span class="infoMsg" id="fnamePreview"></span>
-    <br>
-    <button id="vocabSubmit" class="longButton">__MSG_okButton__</button>
-    <br>
-    <span class="infoMsg" id="addedInfo"></span><br>
-    <span class="infoMsg" id="skippedInfo"></span><br>
-    </fieldset>
+    <main class="page">
+      <section class="panel">
+        <h1 data-i18n="importPageTitle">Word Discoverer: Import vocabulary</h1>
+        <span class="infoMsg" data-i18n="importInfo">New words will be added to your current vocabulary.</span>
+        <label for="doLoadVocab" class="longButton" data-i18n="selectFile">Select File...</label>
+        <input id="doLoadVocab" type="file"/>
+        <span class="infoMsg" id="fnamePreview"></span>
+        <button id="vocabSubmit" class="longButton primary" data-i18n="vocabImport">Import</button>
+        <button id="openVocabAfterImport" class="longButton" data-i18n="manageVocab">Manage Vocabulary</button>
+        <span class="infoMsg" id="addedInfo"></span>
+        <span class="infoMsg" id="skippedInfo"></span>
+      </section>
+    </main>
   </body>
 </html>
