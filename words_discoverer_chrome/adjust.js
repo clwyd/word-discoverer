@@ -100,6 +100,11 @@ function stop_synchronization() {
 }
 
 
+function open_google_drive() {
+    chrome.tabs.create({'url': 'https://drive.google.com/drive/search?q=Words%20Discoverer%20Sync'});
+}
+
+
 function process_test_warnings() {
     chrome.management.getPermissionWarningsByManifest(prompt(), console.log);
 }
@@ -151,8 +156,7 @@ function process_export() {
         keys.sort();
         var file_content = keys.join('\r\n')
         var blob = new Blob([file_content], {type: "text/plain;charset=utf-8"});
-        var filename = list_name === "wd_learning_vocabulary" ? "learning_vocabulary.txt" : "my_vocabulary.txt";
-        saveAs(blob, filename, true);
+        saveAs(blob, get_vocabulary_filename(list_name), true);
     });
 }
 
@@ -164,8 +168,23 @@ function process_manage_vocab() {
 
 
 function process_import() {
-    chrome.tabs.create({'url': chrome.runtime.getURL('import.html?list=' + get_vocab_list_name())}, function (tab) {
-    });
+    var input = document.getElementById("loadVocabFile");
+    if (input) {
+        input.value = "";
+        input.click();
+    }
+}
+
+
+function process_import_file(file) {
+    if (!file) {
+        return;
+    }
+    var reader = new FileReader();
+    reader.onload = function() {
+        import_vocabulary_words(get_vocab_list_name(), parse_vocabulary(reader.result), display_vocabulary_tools_count);
+    };
+    reader.readAsText(file);
 }
 
 
@@ -440,10 +459,14 @@ function process_display() {
             }
 
             document.getElementById("gdSyncButton").addEventListener("click", request_permissions_and_sync);
+            document.getElementById("gdOpenButton").addEventListener("click", open_google_drive);
             document.getElementById("gdStopSyncButton").addEventListener("click", stop_synchronization);
 
             document.getElementById("saveVocab").addEventListener("click", process_export);
             document.getElementById("loadVocab").addEventListener("click", process_import);
+            document.getElementById("loadVocabFile").addEventListener("change", function() {
+                process_import_file(document.getElementById("loadVocabFile").files[0]);
+            });
             document.getElementById("manageVocab").addEventListener("click", process_manage_vocab);
             document.getElementById("vocabListMode").addEventListener("change", display_vocabulary_tools_count);
 

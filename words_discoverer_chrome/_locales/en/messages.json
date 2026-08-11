@@ -179,6 +179,9 @@
   "syncNow": {
     "message": "Synchronize Now"
   },
+  "openGoogleDrive": {
+    "message": "Open Google Drive"
+  },
   "stopSync": {
     "message": "Stop Sync"
   },
@@ -301,6 +304,9 @@
   },
   "vocabNoMatches": {
     "message": "No matching entries"
+  },
+  "openPopup": {
+    "message": "Open Popup"
   },
   "vocabLearning": {
     "message": "Learning"

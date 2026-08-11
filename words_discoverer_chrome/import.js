@@ -1,19 +1,3 @@
-function parse_vocabulary(text) {
-    var lines = text.split('\n');
-    var found = [];
-    for (var i = 0; i < lines.length; ++i) {
-        var word = lines[i];
-        if (i + 1 === lines.length && word.length <= 1)
-            break;
-        if (word.slice(-1) === '\r') {
-            word = word.slice(0, -1);
-        }
-        found.push(word);
-    }
-    return found;
-}
-
-
 function get_import_list_name() {
     var mode = document.getElementById("importListMode");
     return mode ? mode.value : "wd_learning_vocabulary";
@@ -21,58 +5,7 @@ function get_import_list_name() {
 
 
 function add_new_words(new_words) {
-    var list_name = get_import_list_name();
-    chrome.storage.local.get(['wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'], function(result) {
-        var user_vocabulary = result.wd_user_vocabulary || {};
-        var learning_vocabulary = result.wd_learning_vocabulary || {};
-        var wd_user_vocab_added = result.wd_user_vocab_added;
-        var wd_user_vocab_deleted = result.wd_user_vocab_deleted;
-        var num_added = 0;
-        var changed = false;
-        var new_state = {
-            "wd_user_vocabulary": user_vocabulary,
-            "wd_learning_vocabulary": learning_vocabulary
-        };
-        for (var i = 0; i < new_words.length; ++i) {
-            var word = new_words[i];
-            if (list_name === "wd_learning_vocabulary") {
-                var was_learning = learning_vocabulary.hasOwnProperty(word);
-                changed = changed || !was_learning || user_vocabulary.hasOwnProperty(word);
-                learning_vocabulary[word] = 1;
-                delete user_vocabulary[word];
-                if (!was_learning) {
-                    ++num_added;
-                }
-                if (typeof wd_user_vocab_added !== 'undefined') {
-                    delete wd_user_vocab_added[word];
-                    new_state['wd_user_vocab_added'] = wd_user_vocab_added;
-                }
-                if (typeof wd_user_vocab_deleted !== 'undefined') {
-                    wd_user_vocab_deleted[word] = 1;
-                    new_state['wd_user_vocab_deleted'] = wd_user_vocab_deleted;
-                }
-            } else if (list_name === "wd_user_vocabulary") {
-                var was_known = user_vocabulary.hasOwnProperty(word);
-                changed = changed || !was_known || learning_vocabulary.hasOwnProperty(word);
-                user_vocabulary[word] = 1;
-                delete learning_vocabulary[word];
-                if (!was_known) {
-                    ++num_added;
-                }
-                if (typeof wd_user_vocab_added !== 'undefined') {
-                    wd_user_vocab_added[word] = 1;
-                    new_state['wd_user_vocab_added'] = wd_user_vocab_added;
-                }
-                if (typeof wd_user_vocab_deleted !== 'undefined') {
-                    delete wd_user_vocab_deleted[word];
-                    new_state['wd_user_vocab_deleted'] = wd_user_vocab_deleted;
-                }
-            }
-        }
-        if (changed) {
-            chrome.storage.local.set(new_state, sync_if_needed);
-        }
-        var num_skipped = new_words.length - num_added;
+    import_vocabulary_words(get_import_list_name(), new_words, function(num_added, num_skipped) {
         document.getElementById("addedInfo").textContent = spformat(chrome.i18n.getMessage("importAddedInfo"), num_added);
         document.getElementById("skippedInfo").textContent = spformat(chrome.i18n.getMessage("importSkippedInfo"), num_skipped);
         document.getElementById("openVocabAfterImport").style.display = "inline-block";

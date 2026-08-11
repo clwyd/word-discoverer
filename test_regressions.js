@@ -198,6 +198,11 @@ function runVocabListPage() {
 
     const dictButton = findAll(entries[0], (node) => node.tagName === "BUTTON" && node.textContent === "PopupDict")[0];
     dictButton.click();
+    const lookupPanel = findAll(entries[0], (node) => node.attributes.class === "lookupPanel")[0];
+    assert.strictEqual(lookupPanel.style.display, "block");
+    assert.strictEqual(lookupPanel.wdLookupFrame.src, "https://example.test?q=apple");
+    const fallbackButton = findAll(entries[0], (node) => node.tagName === "BUTTON" && node.textContent === "Open Popup")[0];
+    fallbackButton.click();
     assert.strictEqual(messages.pop().wdm_lookup_popup_url, "https://example.test?q=apple");
 
     let markedKnown = null;
@@ -238,6 +243,8 @@ function runVocabListPage() {
     assert.match(listScript, /function render_vocab_page\(\)/);
     assert.match(listScript, /document\.createElement\("details"\)/);
     assert.match(listScript, /wd_learning_vocabulary/);
+    assert.match(listScript, /create_lookup_panel/);
+    assert.match(listScript, /importVocabFile/);
 
     const contextScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/context_menu_lib.js"), "utf8");
     assert.match(contextScript, /add_learning_lexeme/);
@@ -253,8 +260,12 @@ function runVocabListPage() {
     assert.match(importScript, /importListMode/);
     assert.match(importScript, /wd_learning_vocabulary/);
 
+    const adjustScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/adjust.js"), "utf8");
+    assert.match(adjustScript, /loadVocabFile/);
+    assert.match(adjustScript, /open_google_drive/);
+
     const manifest = JSON.parse(fs.readFileSync(path.join(root, "words_discoverer_chrome/manifest.json"), "utf8"));
-    assert.strictEqual(manifest.version, "2.12.7");
+    assert.strictEqual(manifest.version, "2.12.8");
     assert.strictEqual(manifest.options_ui.page, "adjust.html");
 
     runVocabListPage();

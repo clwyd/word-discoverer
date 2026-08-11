@@ -256,6 +256,9 @@
         color: var(--text);
         padding: 0 10px;
     }
+    input[type=file] {
+        display: none;
+    }
     select {
         height: 34px;
         border: 1px solid var(--line);
@@ -313,13 +316,16 @@
       <span class="vocabCount" id="vocabToolsCount"></span>
     </div>
     <div class="buttonRow">
+      <button class="longButton primary" id="manageVocab" data-i18n="manageVocab">Manage Vocabulary</button>
+    </div>
+    <div class="buttonRow">
+      <button class="longButton" id="loadVocab" data-i18n="loadVocab">Import Vocabulary</button>
+      <button class="longButton" id="saveVocab" data-i18n="saveVocab">Export Vocabulary</button>
       <select id="vocabListMode">
         <option value="wd_learning_vocabulary" data-i18n="vocabLearning">Learning</option>
         <option value="wd_user_vocabulary" data-i18n="vocabKnown">Known</option>
       </select>
-      <button class="longButton primary" id="manageVocab" data-i18n="manageVocab">Manage Vocabulary</button>
-      <button class="longButton" id="loadVocab" data-i18n="loadVocab">Import Vocabulary</button>
-      <button class="longButton" id="saveVocab" data-i18n="saveVocab">Export Vocabulary</button>
+      <input id="loadVocabFile" type="file">
     </div>
   </fieldset>
   <br>
@@ -328,6 +334,7 @@
     <br>
     <br>
     <button class="longButton" id="gdSyncButton">__MSG_syncNow__</button>
+    <button class="longButton" id="gdOpenButton">__MSG_openGoogleDrive__</button>
     <button class="longRedButton" id="gdStopSyncButton">__MSG_stopSync__</button>
     <br>
     <br>

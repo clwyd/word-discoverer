@@ -182,6 +182,37 @@ function open_lookup_popup(url) {
     chrome.runtime.sendMessage({wdm_lookup_popup_url: url});
 }
 
+function create_lookup_panel() {
+    var panel = document.createElement("div");
+    panel.setAttribute("class", "lookupPanel");
+    var bar = document.createElement("div");
+    bar.setAttribute("class", "lookupBar");
+    var title = document.createElement("div");
+    title.setAttribute("class", "lookupTitle");
+    var popupButton = create_button(msg("openPopup", "Open Popup"), "", function() {
+        if (panel.wdLookupUrl) {
+            open_lookup_popup(panel.wdLookupUrl);
+        }
+    });
+    bar.appendChild(title);
+    bar.appendChild(popupButton);
+    var frame = document.createElement("iframe");
+    frame.setAttribute("class", "lookupFrame");
+    frame.setAttribute("referrerpolicy", "no-referrer");
+    panel.appendChild(bar);
+    panel.appendChild(frame);
+    panel.wdLookupTitle = title;
+    panel.wdLookupFrame = frame;
+    return panel;
+}
+
+function open_lookup_inline(panel, url, title) {
+    panel.wdLookupUrl = url;
+    panel.wdLookupTitle.textContent = title;
+    panel.wdLookupFrame.src = url;
+    panel.style.display = "block";
+}
+
 function create_fact(label, value) {
     var box = document.createElement("div");
     box.setAttribute("class", "fact");
@@ -239,11 +270,12 @@ function create_vocab_entry(info) {
     actions.appendChild(create_button(msg("audioButton", "Speak"), "", function() {
         chrome.runtime.sendMessage({type: "tts_speak", word: info.key});
     }));
+    var lookupPanel = create_lookup_panel();
     var dictPairs = list_state.onlineDicts.length ? list_state.onlineDicts : make_default_online_dicts();
     for (var i = 0; i < dictPairs.length; ++i) {
         (function(dict) {
             actions.appendChild(create_button(dict.title, "", function() {
-                open_lookup_popup(get_dict_definition_url(dict.url, info.key));
+                open_lookup_inline(lookupPanel, get_dict_definition_url(dict.url, info.key), dict.title);
             }));
         })(dictPairs[i]);
     }
@@ -251,6 +283,7 @@ function create_vocab_entry(info) {
         process_delete_vocab_entry(info.key);
     }));
     body.appendChild(actions);
+    body.appendChild(lookupPanel);
     entry.appendChild(body);
     return entry;
 }
@@ -285,8 +318,28 @@ function export_vocabulary() {
     var keys = get_keys(list_state.userList);
     keys.sort();
     var blob = new Blob([keys.join('\r\n')], {type: "text/plain;charset=utf-8"});
-    var filename = list_state.listName === "wd_learning_vocabulary" ? "learning_vocabulary.txt" : "my_vocabulary.txt";
-    saveAs(blob, filename, true);
+    saveAs(blob, get_vocabulary_filename(list_state.listName), true);
+}
+
+function import_vocabulary_file(file) {
+    if (!file) {
+        return;
+    }
+    var reader = new FileReader();
+    reader.onload = function() {
+        import_vocabulary_words(list_state.listName, parse_vocabulary(reader.result), function() {
+            process_display();
+        });
+    };
+    reader.readAsText(file);
+}
+
+function process_import_vocabulary() {
+    var input = document.getElementById("importVocabFile");
+    if (input) {
+        input.value = "";
+        input.click();
+    }
 }
 
 function init_vocab_controls() {
@@ -295,6 +348,7 @@ function init_vocab_controls() {
     var sort = document.getElementById("sortMode");
     var exportButton = document.getElementById("exportVocab");
     var importButton = document.getElementById("importVocab");
+    var importFile = document.getElementById("importVocabFile");
     if (search) {
         search.addEventListener("input", render_vocab_page);
     }
@@ -310,8 +364,11 @@ function init_vocab_controls() {
         exportButton.addEventListener("click", export_vocabulary);
     }
     if (importButton) {
-        importButton.addEventListener("click", function() {
-            chrome.tabs.create({'url': chrome.runtime.getURL('import.html')});
+        importButton.addEventListener("click", process_import_vocabulary);
+    }
+    if (importFile) {
+        importFile.addEventListener("change", function() {
+            import_vocabulary_file(importFile.files[0]);
         });
     }
 }

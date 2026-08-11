@@ -179,6 +179,9 @@
   "syncNow": {
     "message": "立即同步"
   },
+  "openGoogleDrive": {
+    "message": "打开 Google Drive"
+  },
   "stopSync": {
     "message": "停止同步"
   },
@@ -301,6 +304,9 @@
   },
   "vocabNoMatches": {
     "message": "没有匹配的词条"
+  },
+  "openPopup": {
+    "message": "弹窗打开"
   },
   "vocabLearning": {
     "message": "学习中"
