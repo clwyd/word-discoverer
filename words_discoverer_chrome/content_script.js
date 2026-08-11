@@ -15,6 +15,7 @@ var disable_by_keypress = false;
 
 
 var current_lexeme = "";
+var current_is_highlighted = false;
 var cur_wd_node_id = 1;
 
 var word_re = new RegExp("^[a-z][a-z]*$");
@@ -117,6 +118,7 @@ function renderBubble() {
 
     classattr = node_to_render.getAttribute('class');
     is_highlighted = (classattr != "wdautohl_none_none");
+    current_is_highlighted = is_highlighted;
     param_key = is_highlighted ? "hl_hover" : "ow_hover";
     param_value = wd_hover_settings[param_key];
     if (param_value == "never" || (param_value == "key" && !function_key_is_pressed)) {
@@ -132,6 +134,9 @@ function renderBubble() {
     bubbleFreq.textContent = prcntFreq ? prcntFreq + "%" : "n/a";
     bubbleFreq.style.backgroundColor = getHeatColorPoint(prcntFreq);
     current_lexeme = wdSpanText;
+    document.getElementById("wd_selection_bubble_action").textContent = is_highlighted
+        ? (chrome.i18n.getMessage("markKnownButton") || "Mark Known")
+        : (chrome.i18n.getMessage("menuItem") || "Add to Learning");
     bubbleDOM.style.display = 'block';
     var point = node_to_render_point;
     if (!point) {
@@ -546,6 +551,19 @@ function bubble_handle_add_result(report, lemma) {
 }
 
 
+function bubble_handle_learning_result(report, lemma) {
+    if (report === "ok") {
+        learning_vocabulary = learning_vocabulary || {};
+        user_vocabulary = user_vocabulary || {};
+        learning_vocabulary[lemma] = 1;
+        delete user_vocabulary[lemma];
+        mark_learning(lemma);
+        mark_matching_unhighlighted_nodes_learning(lemma);
+        doHighlightText(textNodesUnder(document.body));
+    }
+}
+
+
 function create_bubble() {
     var bubbleDOM = document.createElement('div');
     bubbleDOM.setAttribute('class', 'wdSelectionBubble');
@@ -567,10 +585,15 @@ function create_bubble() {
 
     var addButton = document.createElement('button');
     addButton.setAttribute('class', 'wdAddButton');
+    addButton.setAttribute('id', 'wd_selection_bubble_action');
     addButton.textContent = chrome.i18n.getMessage("markKnownButton") || "Mark Known";
     addButton.style.marginBottom = "4px";
     addButton.addEventListener("click", function () {
-        add_known_lexeme(current_lexeme, bubble_handle_add_result);
+        if (current_is_highlighted) {
+            add_known_lexeme(current_lexeme, bubble_handle_add_result);
+        } else {
+            add_learning_lexeme(current_lexeme, bubble_handle_learning_result);
+        }
     });
     bubbleDOM.appendChild(addButton);
 
@@ -621,6 +644,10 @@ function initForPage() {
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         if (request.wdm_unhighlight) {
             var lemma = request.wdm_unhighlight;
+            user_vocabulary = user_vocabulary || {};
+            learning_vocabulary = learning_vocabulary || {};
+            user_vocabulary[lemma] = 1;
+            delete learning_vocabulary[lemma];
             unhighlight(lemma);
         } else if (request.wdm_mark_learning) {
             var learning_lemma = request.wdm_mark_learning;

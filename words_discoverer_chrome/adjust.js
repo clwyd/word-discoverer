@@ -132,9 +132,16 @@ function process_set_dbg() {
 }
 
 
+function get_vocab_list_name() {
+    var mode = document.getElementById("vocabListMode");
+    return mode ? mode.value : "wd_learning_vocabulary";
+}
+
+
 function process_export() {
-    chrome.storage.local.get(['wd_user_vocabulary'], function (result) {
-        var user_vocabulary = result.wd_user_vocabulary || {};
+    var list_name = get_vocab_list_name();
+    chrome.storage.local.get([list_name], function (result) {
+        var user_vocabulary = result[list_name] || {};
         var keys = [];
         for (var key in user_vocabulary) {
             if (user_vocabulary.hasOwnProperty(key)) {
@@ -144,26 +151,28 @@ function process_export() {
         keys.sort();
         var file_content = keys.join('\r\n')
         var blob = new Blob([file_content], {type: "text/plain;charset=utf-8"});
-        saveAs(blob, "my_vocabulary.txt", true);
+        var filename = list_name === "wd_learning_vocabulary" ? "learning_vocabulary.txt" : "my_vocabulary.txt";
+        saveAs(blob, filename, true);
     });
 }
 
 
 function process_manage_vocab() {
-    chrome.tabs.create({'url': chrome.runtime.getURL('display.html')}, function (tab) {
+    chrome.tabs.create({'url': chrome.runtime.getURL('display.html?list=' + get_vocab_list_name())}, function (tab) {
     });
 }
 
 
 function process_import() {
-    chrome.tabs.create({'url': chrome.runtime.getURL('import.html')}, function (tab) {
+    chrome.tabs.create({'url': chrome.runtime.getURL('import.html?list=' + get_vocab_list_name())}, function (tab) {
     });
 }
 
 
 function display_vocabulary_tools_count() {
-    chrome.storage.local.get(['wd_user_vocabulary'], function (result) {
-        var user_vocabulary = result.wd_user_vocabulary || {};
+    var list_name = get_vocab_list_name();
+    chrome.storage.local.get([list_name], function (result) {
+        var user_vocabulary = result[list_name] || {};
         var entryCountFormat = chrome.i18n.getMessage("vocabEntryCount") || "{0} entries";
         document.getElementById("vocabToolsCount").textContent = spformat(entryCountFormat, Object.keys(user_vocabulary).length);
     });
@@ -436,6 +445,7 @@ function process_display() {
             document.getElementById("saveVocab").addEventListener("click", process_export);
             document.getElementById("loadVocab").addEventListener("click", process_import);
             document.getElementById("manageVocab").addEventListener("click", process_manage_vocab);
+            document.getElementById("vocabListMode").addEventListener("change", display_vocabulary_tools_count);
 
             document.getElementById("getFromStorageBtn").addEventListener("click", process_get_dbg);
             document.getElementById("setToStorageBtn").addEventListener("click", process_set_dbg);

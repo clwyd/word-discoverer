@@ -13,18 +13,52 @@ function parse_vocabulary(text) {
     return found;
 }
 
+
+function get_import_list_name() {
+    var mode = document.getElementById("importListMode");
+    return mode ? mode.value : "wd_learning_vocabulary";
+}
+
+
 function add_new_words(new_words) {
-    chrome.storage.local.get(['wd_user_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'], function(result) {
+    var list_name = get_import_list_name();
+    chrome.storage.local.get(['wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'], function(result) {
         var user_vocabulary = result.wd_user_vocabulary || {};
+        var learning_vocabulary = result.wd_learning_vocabulary || {};
         var wd_user_vocab_added = result.wd_user_vocab_added;
         var wd_user_vocab_deleted = result.wd_user_vocab_deleted;
         var num_added = 0;
-        var new_state = {"wd_user_vocabulary": user_vocabulary};
+        var changed = false;
+        var new_state = {
+            "wd_user_vocabulary": user_vocabulary,
+            "wd_learning_vocabulary": learning_vocabulary
+        };
         for (var i = 0; i < new_words.length; ++i) {
             var word = new_words[i];
-            if (!(user_vocabulary.hasOwnProperty(word))) {
+            if (list_name === "wd_learning_vocabulary") {
+                var was_learning = learning_vocabulary.hasOwnProperty(word);
+                changed = changed || !was_learning || user_vocabulary.hasOwnProperty(word);
+                learning_vocabulary[word] = 1;
+                delete user_vocabulary[word];
+                if (!was_learning) {
+                    ++num_added;
+                }
+                if (typeof wd_user_vocab_added !== 'undefined') {
+                    delete wd_user_vocab_added[word];
+                    new_state['wd_user_vocab_added'] = wd_user_vocab_added;
+                }
+                if (typeof wd_user_vocab_deleted !== 'undefined') {
+                    wd_user_vocab_deleted[word] = 1;
+                    new_state['wd_user_vocab_deleted'] = wd_user_vocab_deleted;
+                }
+            } else if (list_name === "wd_user_vocabulary") {
+                var was_known = user_vocabulary.hasOwnProperty(word);
+                changed = changed || !was_known || learning_vocabulary.hasOwnProperty(word);
                 user_vocabulary[word] = 1;
-                ++num_added;
+                delete learning_vocabulary[word];
+                if (!was_known) {
+                    ++num_added;
+                }
                 if (typeof wd_user_vocab_added !== 'undefined') {
                     wd_user_vocab_added[word] = 1;
                     new_state['wd_user_vocab_added'] = wd_user_vocab_added;
@@ -35,7 +69,7 @@ function add_new_words(new_words) {
                 }
             }
         }
-        if (num_added) {
+        if (changed) {
             chrome.storage.local.set(new_state, sync_if_needed);
         }
         var num_skipped = new_words.length - num_added;
@@ -70,10 +104,14 @@ function process_submit() {
 function init_controls() {
     window.onload=function() {
         localizeHtmlPage();
+        var listName = new URLSearchParams(window.location.search).get("list");
+        if (listName === "wd_user_vocabulary" || listName === "wd_learning_vocabulary") {
+            document.getElementById("importListMode").value = listName;
+        }
         document.getElementById("vocabSubmit").addEventListener("click", process_submit);
         document.getElementById("doLoadVocab").addEventListener("change", process_change);
         document.getElementById("openVocabAfterImport").addEventListener("click", function() {
-            chrome.tabs.create({'url': chrome.runtime.getURL('display.html')});
+            chrome.tabs.create({'url': chrome.runtime.getURL('display.html?list=' + get_import_list_name())});
         });
     }
 }

@@ -196,11 +196,13 @@ function google_translate_url(targetLang) {
     return "https://translate.google.com/?hl=" + lang + "&sl=en&tl=" + lang + "&op=translate&text=";
 }
 
-function showDefinition(dictUrl, text) {
+function showDefinition(dictUrl, text, tab) {
     var fullUrl = get_dict_definition_url(dictUrl, text);
-    chrome.tabs.create({'url': fullUrl}, function(tab) {
-      // opens definition in a new tab
-    });
+    if (typeof open_lookup_popup === "function") {
+        open_lookup_popup(fullUrl, {tab: tab});
+        return;
+    }
+    chrome.runtime.sendMessage({wdm_lookup_popup_url: fullUrl});
 }
 
 function createDictionaryEntry(title, dictUrl, entryId) {
@@ -214,7 +216,16 @@ function context_handle_learning_result(tab, report, lemma) {
     }
 }
 
-function onClickHandler(info, tab) {
+
+function context_handle_known_result(tab, report, lemma) {
+    if (report === "ok" && tab && typeof tab.id === "number") {
+        chrome.tabs.sendMessage(tab.id, {wdm_unhighlight: lemma}, function() {
+        });
+    }
+}
+
+
+function onLearningClickHandler(info, tab) {
     var word = info.selectionText;
     add_learning_lexeme(word, function(report, lemma) {
         context_handle_learning_result(tab, report, lemma);
@@ -222,7 +233,15 @@ function onClickHandler(info, tab) {
 };
 
 
-function contextDictionaryHandler(info) {
+function onKnownClickHandler(info, tab) {
+    var word = info.selectionText;
+    add_known_lexeme(word, function(report, lemma) {
+        context_handle_known_result(tab, report, lemma);
+    });
+};
+
+
+function contextDictionaryHandler(info, tab) {
     var entryId = String(info.menuItemId || "");
     if (!entryId.startsWith("wd_define_")) {
         return;
@@ -234,7 +253,7 @@ function contextDictionaryHandler(info) {
     chrome.storage.local.get(["wd_online_dicts"], function(result) {
         var dictPairs = result.wd_online_dicts || make_default_online_dicts();
         if (dictNo >= 0 && dictNo < dictPairs.length) {
-            showDefinition(dictPairs[dictNo].url, info.selectionText);
+            showDefinition(dictPairs[dictNo].url, info.selectionText, tab);
         }
     });
 }
@@ -242,9 +261,11 @@ function contextDictionaryHandler(info) {
 
 function handleContextMenuClick(info, tab) {
     if (info.menuItemId === "vocab_select_add") {
-        onClickHandler(info, tab);
+        onLearningClickHandler(info, tab);
+    } else if (info.menuItemId === "vocab_select_known") {
+        onKnownClickHandler(info, tab);
     } else {
-        contextDictionaryHandler(info);
+        contextDictionaryHandler(info, tab);
     }
 }
 
@@ -271,6 +292,7 @@ function initContextMenus(dictPairs) {
     chrome.contextMenus.removeAll(function() {
         var title = chrome.i18n.getMessage("menuItem");
         chrome.contextMenus.create({"title": title, "contexts":["selection"], "id": "vocab_select_add"});
+        chrome.contextMenus.create({"title": chrome.i18n.getMessage("markKnownButton") || "Mark Known", "contexts":["selection"], "id": "vocab_select_known"});
         chrome.contextMenus.create({type: 'separator', "contexts":["selection"], "id": "wd_separator_id"});
         for (var i = 0; i < dictPairs.length; ++i) {
             createDictionaryEntry(dictPairs[i].title, dictPairs[i].url, "wd_define_" + i);

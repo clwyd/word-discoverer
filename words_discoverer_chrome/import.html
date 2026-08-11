@@ -65,6 +65,16 @@
     .longButton:hover {
         background: var(--surface-strong);
     }
+    select {
+        min-height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text);
+        padding: 0 10px;
+        font: inherit;
+        margin: 4px 4px 4px 0;
+    }
     .primary {
         border-color: var(--accent);
         background: var(--accent);
@@ -86,6 +96,10 @@
       <section class="panel">
         <h1 data-i18n="importPageTitle">Word Discoverer: Import vocabulary</h1>
         <span class="infoMsg" data-i18n="importInfo">New words will be added to your current vocabulary.</span>
+        <select id="importListMode">
+          <option value="wd_learning_vocabulary" data-i18n="vocabLearning">Learning</option>
+          <option value="wd_user_vocabulary" data-i18n="vocabKnown">Known</option>
+        </select>
         <label for="doLoadVocab" class="longButton" data-i18n="selectFile">Select File...</label>
         <input id="doLoadVocab" type="file"/>
         <span class="infoMsg" id="fnamePreview"></span>

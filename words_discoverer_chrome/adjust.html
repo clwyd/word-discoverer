@@ -256,6 +256,15 @@
         color: var(--text);
         padding: 0 10px;
     }
+    select {
+        height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text);
+        padding: 0 10px;
+        font: inherit;
+    }
     .vocabTools {
         display: grid;
         gap: 10px;
@@ -304,6 +313,10 @@
       <span class="vocabCount" id="vocabToolsCount"></span>
     </div>
     <div class="buttonRow">
+      <select id="vocabListMode">
+        <option value="wd_learning_vocabulary" data-i18n="vocabLearning">Learning</option>
+        <option value="wd_user_vocabulary" data-i18n="vocabKnown">Known</option>
+      </select>
       <button class="longButton primary" id="manageVocab" data-i18n="manageVocab">Manage Vocabulary</button>
       <button class="longButton" id="loadVocab" data-i18n="loadVocab">Import Vocabulary</button>
       <button class="longButton" id="saveVocab" data-i18n="saveVocab">Export Vocabulary</button>

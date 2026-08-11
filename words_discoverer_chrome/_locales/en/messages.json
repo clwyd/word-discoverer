@@ -43,10 +43,10 @@
     "message": "Manage Local Vocabulary"
   },
   "saveVocab": {
-    "message": "Export Vocabulary"
+    "message": "Export Selected List"
   },
   "loadVocab": {
-    "message": "Import Vocabulary"
+    "message": "Import to Selected List"
   },
   "manageVocab": {
     "message": "Manage Local Vocabulary"
@@ -147,7 +147,7 @@
     "message": "Adjust highlighting color"
   },
   "importInfo": {
-    "message": "New words will be added to your current vocabulary."
+    "message": "New words will be added to the selected list."
   },
   "importNoFile": {
     "message": "Select a vocabulary file first."

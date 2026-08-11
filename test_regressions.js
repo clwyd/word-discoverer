@@ -231,6 +231,7 @@ function runVocabListPage() {
     assert.match(contentScript, /wdm_mark_learning/);
     assert.match(contentScript, /make_learning_hl_style/);
     assert.match(contentScript, /markKnownButton/);
+    assert.match(contentScript, /current_is_highlighted/);
     assert.doesNotMatch(contentScript, /addEventListener\('mousemove'/);
 
     const listScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/black_white.js"), "utf8");
@@ -240,13 +241,20 @@ function runVocabListPage() {
 
     const contextScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/context_menu_lib.js"), "utf8");
     assert.match(contextScript, /add_learning_lexeme/);
+    assert.match(contextScript, /add_known_lexeme/);
+    assert.match(contextScript, /vocab_select_known/);
     assert.match(contextScript, /wdm_mark_learning/);
+    assert.doesNotMatch(contextScript, /chrome\.tabs\.create\(\{'url': fullUrl\}/);
 
     const popupScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/popup.js"), "utf8");
     assert.match(popupScript, /wd_learning_vocabulary/);
 
+    const importScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/import.js"), "utf8");
+    assert.match(importScript, /importListMode/);
+    assert.match(importScript, /wd_learning_vocabulary/);
+
     const manifest = JSON.parse(fs.readFileSync(path.join(root, "words_discoverer_chrome/manifest.json"), "utf8"));
-    assert.strictEqual(manifest.version, "2.12.6");
+    assert.strictEqual(manifest.version, "2.12.7");
     assert.strictEqual(manifest.options_ui.page, "adjust.html");
 
     runVocabListPage();

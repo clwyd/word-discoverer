@@ -70,6 +70,12 @@ function process_mark_known_entry(key) {
 }
 
 function get_list_name() {
+    if (typeof window !== "undefined") {
+        var listName = new URLSearchParams(window.location.search).get("list");
+        if (listName === "wd_user_vocabulary" || listName === "wd_learning_vocabulary") {
+            return listName;
+        }
+    }
     var page = document.querySelector("[data-list-name]");
     if (page) {
         return page.getAttribute("data-list-name");

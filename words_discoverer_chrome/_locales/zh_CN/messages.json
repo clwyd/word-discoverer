@@ -43,10 +43,10 @@
     "message": "管理本地词汇表"
   },
   "saveVocab": {
-    "message": "导出词汇表"
+    "message": "导出所选列表"
   },
   "loadVocab": {
-    "message": "导入词汇表"
+    "message": "导入到所选列表"
   },
   "manageVocab": {
     "message": "管理本地词汇表"
@@ -147,7 +147,7 @@
     "message": "调整高亮颜色"
   },
   "importInfo": {
-    "message": "新单词会合并到你当前的词汇表中。"
+    "message": "新单词会添加到当前选择的列表中。"
   },
   "importNoFile": {
     "message": "请先选择词汇表文件。"
