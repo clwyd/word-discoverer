@@ -1,4 +1,5 @@
 var gdrive_token = null;
+var free_dictionary_cache = {};
 
 //TODO check chrome.runtime.lastError for all storage.local operations
 
@@ -249,23 +250,27 @@ function find_gdrive_id(query, found_cb, not_found_cb) {
 }
 
 
-function apply_cloud_vocab(entries) {
+function apply_cloud_vocab(vocab, entries, done) {
     var sync_date = new Date();
     var sync_time = sync_date.getTime();
     var new_state = {
         "wd_last_sync_error": null,
-        "wd_user_vocabulary": entries,
-        "wd_user_vocab_added": {},
-        "wd_user_vocab_deleted": {},
         "wd_last_sync": sync_time
     };
+    new_state[vocab.storage_key] = entries;
+    new_state[vocab.added_key] = {};
+    new_state[vocab.deleted_key] = {};
     chrome.storage.local.set(new_state, function () {
-        chrome.runtime.sendMessage({'sync_feedback': 1});
+        if (done) {
+            done();
+        } else {
+            chrome.runtime.sendMessage({'sync_feedback': 1});
+        }
     });
 }
 
 
-function sync_vocabulary(dir_id, vocab) {
+function sync_vocabulary(dir_id, vocab, done) {
     merge_and_upload_vocab = function (file_id, file_content) {
         vocab_list = parse_vocabulary(file_content);
         var entries = list_to_set(vocab_list);
@@ -274,7 +279,7 @@ function sync_vocabulary(dir_id, vocab) {
         merged_content = serialize_vocabulary(entries);
 
         set_merged_vocab = function () {
-            apply_cloud_vocab(entries);
+            apply_cloud_vocab(vocab, entries, done);
         }
         upload_file_content(file_id, merged_content, set_merged_vocab);
     }
@@ -319,12 +324,12 @@ function backup_vocabulary(dir_id, vocab, success_cb) {
 }
 
 
-function perform_full_sync(vocab) {
+function perform_full_sync(vocab, done) {
     var dir_name = "Words Discoverer Sync";
     var dir_query = "name = '" + dir_name + "' and trashed = false and appProperties has { key='wdfile' and value='1' }";
     backup_and_sync_vocabulary = function (dir_id) {
         sync_vocabulary_wrap = function () {
-            sync_vocabulary(dir_id, vocab);
+            sync_vocabulary(dir_id, vocab, done);
         }
         backup_vocabulary(dir_id, vocab, sync_vocabulary_wrap);
     }
@@ -335,11 +340,25 @@ function perform_full_sync(vocab) {
 }
 
 
+function sync_vocabularies(vocabs, index) {
+    if (index >= vocabs.length) {
+        chrome.runtime.sendMessage({'sync_feedback': 1});
+        return;
+    }
+    perform_full_sync(vocabs[index], function () {
+        sync_vocabularies(vocabs, index + 1);
+    });
+}
+
+
 function sync_user_vocabularies() {
-    chrome.storage.local.get(['wd_user_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'], function (result) {
+    chrome.storage.local.get(['wd_user_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted', 'wd_learning_vocabulary', 'wd_learning_vocab_added', 'wd_learning_vocab_deleted'], function (result) {
         var wd_user_vocabulary = result.wd_user_vocabulary;
         var wd_user_vocab_added = result.wd_user_vocab_added;
         var wd_user_vocab_deleted = result.wd_user_vocab_deleted;
+        var wd_learning_vocabulary = result.wd_learning_vocabulary;
+        var wd_learning_vocab_added = result.wd_learning_vocab_added;
+        var wd_learning_vocab_deleted = result.wd_learning_vocab_deleted;
         if (typeof wd_user_vocabulary === 'undefined') {
             wd_user_vocabulary = {};
         }
@@ -349,13 +368,34 @@ function sync_user_vocabularies() {
         if (typeof wd_user_vocab_deleted === 'undefined') {
             wd_user_vocab_deleted = {};
         }
-        var vocab = {
+        if (typeof wd_learning_vocabulary === 'undefined') {
+            wd_learning_vocabulary = {};
+        }
+        if (typeof wd_learning_vocab_added === 'undefined') {
+            wd_learning_vocab_added = Object.assign({}, wd_learning_vocabulary);
+        }
+        if (typeof wd_learning_vocab_deleted === 'undefined') {
+            wd_learning_vocab_deleted = {};
+        }
+        var user_vocab = {
             "name": "my_vocabulary",
+            "storage_key": "wd_user_vocabulary",
+            "added_key": "wd_user_vocab_added",
+            "deleted_key": "wd_user_vocab_deleted",
             "all": wd_user_vocabulary,
             "added": wd_user_vocab_added,
             "deleted": wd_user_vocab_deleted
         };
-        perform_full_sync(vocab);
+        var learning_vocab = {
+            "name": "learning_vocabulary",
+            "storage_key": "wd_learning_vocabulary",
+            "added_key": "wd_learning_vocab_added",
+            "deleted_key": "wd_learning_vocab_deleted",
+            "all": wd_learning_vocabulary,
+            "added": wd_learning_vocab_added,
+            "deleted": wd_learning_vocab_deleted
+        };
+        sync_vocabularies([user_vocab, learning_vocab], 0);
     });
 }
 
@@ -392,6 +432,36 @@ function open_lookup_popup(url, sender, position) {
         return;
     }
     chrome.windows.create(popupOptions);
+}
+
+
+function fetch_free_dictionary_definition(word, sendResponse) {
+    word = (word || "").toLowerCase().trim();
+    if (!word || word.length > 100) {
+        sendResponse({ok: false, found: false});
+        return;
+    }
+    if (free_dictionary_cache.hasOwnProperty(word)) {
+        sendResponse(free_dictionary_cache[word]);
+        return;
+    }
+    var url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word);
+    fetch(url).then(function (response) {
+        if (response.status == 404) {
+            return {ok: true, found: false, word: word, phonetic: "", audio: "", meanings: []};
+        }
+        if (!response.ok) {
+            throw new Error("Bad status: " + response.status);
+        }
+        return response.json().then(function (data) {
+            return normalize_free_dictionary_response(word, data);
+        });
+    }).then(function (definition) {
+        free_dictionary_cache[word] = definition;
+        sendResponse(definition);
+    }).catch(function () {
+        sendResponse({ok: false, found: false, word: word, phonetic: "", audio: "", meanings: []});
+    });
 }
 
 
@@ -439,6 +509,9 @@ function initialize_extension() {
             });
         } else if (request.wdm_lookup_popup_url) {
             open_lookup_popup(request.wdm_lookup_popup_url, sender, request.wdm_popup_position);
+        } else if (request.wdm_request == "free_dictionary") {
+            fetch_free_dictionary_definition(request.word, sendResponse);
+            return true;
         } else if (request.wdm_request == "gd_sync") {
             start_sync_sequence(request.interactive_mode);
         }

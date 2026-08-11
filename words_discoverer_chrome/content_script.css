@@ -31,6 +31,7 @@
     border-style: none !important;
     border-width: 0px !important;
     vertical-align: baseline !important;
+    clear: both !important;
 }
 .wdAddButton:hover {
     background-color: #102310 !important;
@@ -106,7 +107,7 @@
 }
 
 .wdSelectionBubble {
-    width: 200px !important;
+    width: 280px !important;
     top: 0px;
     left: 0px;
     z-index: 1000000 !important;
@@ -125,7 +126,52 @@
     line-height: 65% !important;
 }
 
+.wdDefinitionPanel {
+    display: none;
+    clear: both !important;
+    max-height: 180px !important;
+    overflow: auto !important;
+    padding: 7px !important;
+    margin: 0 !important;
+    background-color: #fffdf5 !important;
+    color: #111 !important;
+    border-top: 1px solid black !important;
+    font-size: 12px !important;
+    font-family: Arial !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-variant: normal !important;
+    line-height: 1.35 !important;
+    text-align: left !important;
+}
+
+.wdDefinitionPhonetic,
+.wdDefinitionPart,
+.wdDefinitionText,
+.wdDefinitionExample,
+.wdDefinitionSynonyms,
+.wdDefinitionEmpty {
+    margin: 0 0 5px 0 !important;
+    padding: 0 !important;
+    color: #111 !important;
+    background: transparent !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    text-align: left !important;
+}
+
+.wdDefinitionPart {
+    color: #0b5f59 !important;
+    font-weight: bold !important;
+}
+
+.wdDefinitionExample,
+.wdDefinitionSynonyms,
+.wdDefinitionPhonetic,
+.wdDefinitionEmpty {
+    color: #5b6470 !important;
+}
+
 wdautohl-customtag {
     visibility: visible !important;
 }
-

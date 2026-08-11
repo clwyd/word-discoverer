@@ -62,12 +62,102 @@ function parse_vocabulary(text) {
 }
 
 
+function normalize_free_dictionary_response(word, data) {
+    var result = {ok: true, found: false, word: word, phonetic: "", audio: "", meanings: []};
+    if (!Array.isArray(data) || !data.length) {
+        return result;
+    }
+    var first = data[0] || {};
+    result.found = true;
+    result.word = first.word || word;
+    result.phonetic = first.phonetic || "";
+    var phonetics = first.phonetics || [];
+    for (var i = 0; i < phonetics.length; ++i) {
+        if (!result.phonetic && phonetics[i].text) {
+            result.phonetic = phonetics[i].text;
+        }
+        if (!result.audio && phonetics[i].audio) {
+            result.audio = phonetics[i].audio;
+        }
+    }
+    for (var e = 0; e < data.length && result.meanings.length < 3; ++e) {
+        var meanings = data[e].meanings || [];
+        for (var m = 0; m < meanings.length && result.meanings.length < 3; ++m) {
+            var source = meanings[m];
+            var defs = [];
+            var definitions = source.definitions || [];
+            for (var d = 0; d < definitions.length && defs.length < 2; ++d) {
+                defs.push({
+                    definition: definitions[d].definition || "",
+                    example: definitions[d].example || "",
+                    synonyms: (definitions[d].synonyms || []).slice(0, 5)
+                });
+            }
+            if (defs.length) {
+                result.meanings.push({
+                    partOfSpeech: source.partOfSpeech || "",
+                    definitions: defs,
+                    synonyms: (source.synonyms || []).slice(0, 5)
+                });
+            }
+        }
+    }
+    return result;
+}
+
+
+function render_free_dictionary_definition(container, definition, get_message) {
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+    }
+    function msg(key, fallback) {
+        return get_message ? (get_message(key) || fallback) : fallback;
+    }
+    function append_text(class_name, text) {
+        var node = document.createElement("div");
+        node.setAttribute("class", class_name);
+        node.textContent = text;
+        container.appendChild(node);
+        return node;
+    }
+    if (!definition || !definition.ok) {
+        append_text("wdDefinitionEmpty", msg("definitionUnavailable", "Definition unavailable"));
+        return;
+    }
+    if (!definition.found || !definition.meanings.length) {
+        append_text("wdDefinitionEmpty", msg("definitionNone", "No definition found"));
+        return;
+    }
+    if (definition.phonetic) {
+        append_text("wdDefinitionPhonetic", definition.phonetic);
+    }
+    for (var m = 0; m < definition.meanings.length; ++m) {
+        var meaning = definition.meanings[m];
+        if (meaning.partOfSpeech) {
+            append_text("wdDefinitionPart", meaning.partOfSpeech);
+        }
+        for (var d = 0; d < meaning.definitions.length; ++d) {
+            var item = meaning.definitions[d];
+            append_text("wdDefinitionText", (d + 1) + ". " + item.definition);
+            if (item.example) {
+                append_text("wdDefinitionExample", '"' + item.example + '"');
+            }
+        }
+        if (meaning.synonyms && meaning.synonyms.length) {
+            append_text("wdDefinitionSynonyms", msg("definitionSynonyms", "Synonyms") + ": " + meaning.synonyms.join(", "));
+        }
+    }
+}
+
+
 function import_vocabulary_words(list_name, new_words, result_handler) {
-    chrome.storage.local.get(['wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'], function(result) {
+    chrome.storage.local.get(['wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted', 'wd_learning_vocab_added', 'wd_learning_vocab_deleted'], function(result) {
         var user_vocabulary = result.wd_user_vocabulary || {};
         var learning_vocabulary = result.wd_learning_vocabulary || {};
         var wd_user_vocab_added = result.wd_user_vocab_added;
         var wd_user_vocab_deleted = result.wd_user_vocab_deleted;
+        var wd_learning_vocab_added = result.wd_learning_vocab_added;
+        var wd_learning_vocab_deleted = result.wd_learning_vocab_deleted;
         var num_added = 0;
         var changed = false;
         var new_state = {
@@ -92,6 +182,14 @@ function import_vocabulary_words(list_name, new_words, result_handler) {
                     wd_user_vocab_deleted[word] = 1;
                     new_state['wd_user_vocab_deleted'] = wd_user_vocab_deleted;
                 }
+                if (typeof wd_learning_vocab_added !== 'undefined') {
+                    wd_learning_vocab_added[word] = 1;
+                    new_state['wd_learning_vocab_added'] = wd_learning_vocab_added;
+                }
+                if (typeof wd_learning_vocab_deleted !== 'undefined') {
+                    delete wd_learning_vocab_deleted[word];
+                    new_state['wd_learning_vocab_deleted'] = wd_learning_vocab_deleted;
+                }
             } else if (list_name === "wd_user_vocabulary") {
                 var was_known = user_vocabulary.hasOwnProperty(word);
                 changed = changed || !was_known || learning_vocabulary.hasOwnProperty(word);
@@ -107,6 +205,14 @@ function import_vocabulary_words(list_name, new_words, result_handler) {
                 if (typeof wd_user_vocab_deleted !== 'undefined') {
                     delete wd_user_vocab_deleted[word];
                     new_state['wd_user_vocab_deleted'] = wd_user_vocab_deleted;
+                }
+                if (typeof wd_learning_vocab_added !== 'undefined') {
+                    delete wd_learning_vocab_added[word];
+                    new_state['wd_learning_vocab_added'] = wd_learning_vocab_added;
+                }
+                if (typeof wd_learning_vocab_deleted !== 'undefined') {
+                    wd_learning_vocab_deleted[word] = 1;
+                    new_state['wd_learning_vocab_deleted'] = wd_learning_vocab_deleted;
                 }
             }
         }
@@ -150,7 +256,7 @@ function normalize_lexeme(lexeme, dict_words, dict_idioms) {
 
 
 function add_known_lexeme(lexeme, result_handler) {
-    var req_keys = ['words_discoverer_eng_dict', 'wd_idioms', 'wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'];
+    var req_keys = ['words_discoverer_eng_dict', 'wd_idioms', 'wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted', 'wd_learning_vocab_added', 'wd_learning_vocab_deleted'];
     chrome.storage.local.get(req_keys, function(result) {
         var dict_words = result.words_discoverer_eng_dict || {};
         var dict_idioms = result.wd_idioms || {};
@@ -158,6 +264,8 @@ function add_known_lexeme(lexeme, result_handler) {
         var learning_vocabulary = result.wd_learning_vocabulary || {};
         var wd_user_vocab_added = result.wd_user_vocab_added;
         var wd_user_vocab_deleted = result.wd_user_vocab_deleted;
+        var wd_learning_vocab_added = result.wd_learning_vocab_added;
+        var wd_learning_vocab_deleted = result.wd_learning_vocab_deleted;
         var key = normalize_lexeme(lexeme, dict_words, dict_idioms);
         if (!key) {
             result_handler("bad", undefined);
@@ -178,6 +286,14 @@ function add_known_lexeme(lexeme, result_handler) {
             delete wd_user_vocab_deleted[key];
             new_state['wd_user_vocab_deleted'] = wd_user_vocab_deleted;
         }
+        if (typeof wd_learning_vocab_added !== 'undefined') {
+            delete wd_learning_vocab_added[key];
+            new_state['wd_learning_vocab_added'] = wd_learning_vocab_added;
+        }
+        if (typeof wd_learning_vocab_deleted !== 'undefined') {
+            wd_learning_vocab_deleted[key] = 1;
+            new_state['wd_learning_vocab_deleted'] = wd_learning_vocab_deleted;
+        }
 
         chrome.storage.local.set(new_state, function() {
             sync_if_needed();
@@ -188,7 +304,7 @@ function add_known_lexeme(lexeme, result_handler) {
 
 
 function add_learning_lexeme(lexeme, result_handler) {
-    var req_keys = ['words_discoverer_eng_dict', 'wd_idioms', 'wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'];
+    var req_keys = ['words_discoverer_eng_dict', 'wd_idioms', 'wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted', 'wd_learning_vocab_added', 'wd_learning_vocab_deleted'];
     chrome.storage.local.get(req_keys, function(result) {
         var dict_words = result.words_discoverer_eng_dict || {};
         var dict_idioms = result.wd_idioms || {};
@@ -196,6 +312,8 @@ function add_learning_lexeme(lexeme, result_handler) {
         var learning_vocabulary = result.wd_learning_vocabulary || {};
         var wd_user_vocab_added = result.wd_user_vocab_added;
         var wd_user_vocab_deleted = result.wd_user_vocab_deleted;
+        var wd_learning_vocab_added = result.wd_learning_vocab_added;
+        var wd_learning_vocab_deleted = result.wd_learning_vocab_deleted;
         var key = normalize_lexeme(lexeme, dict_words, dict_idioms);
         if (!key) {
             result_handler("bad", undefined);
@@ -215,6 +333,14 @@ function add_learning_lexeme(lexeme, result_handler) {
         if (typeof wd_user_vocab_deleted !== 'undefined') {
             wd_user_vocab_deleted[key] = 1;
             new_state['wd_user_vocab_deleted'] = wd_user_vocab_deleted;
+        }
+        if (typeof wd_learning_vocab_added !== 'undefined') {
+            wd_learning_vocab_added[key] = 1;
+            new_state['wd_learning_vocab_added'] = wd_learning_vocab_added;
+        }
+        if (typeof wd_learning_vocab_deleted !== 'undefined') {
+            delete wd_learning_vocab_deleted[key];
+            new_state['wd_learning_vocab_deleted'] = wd_learning_vocab_deleted;
         }
 
         chrome.storage.local.set(new_state, function() {

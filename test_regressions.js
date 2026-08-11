@@ -4,6 +4,7 @@ const path = require("path");
 const vm = require("vm");
 
 const root = __dirname;
+const plain = (value) => JSON.parse(JSON.stringify(value));
 
 function runContextLib() {
     const sandbox = {
@@ -40,6 +41,7 @@ async function runBackgroundLib() {
         }
     };
     const source = fs
+        .readFileSync(path.join(root, "words_discoverer_chrome/common_lib.js"), "utf8") + "\n" + fs
         .readFileSync(path.join(root, "words_discoverer_chrome/background.js"), "utf8")
         .replace(/\ninitialize_extension\(\);\s*$/, "\n");
 
@@ -69,6 +71,32 @@ async function runBackgroundLib() {
     assert.strictEqual(Array.isArray(jsonResult.result.files), true);
     assert.strictEqual(jsonResult.result.files.length, 0);
 
+    const definitionResult = await new Promise((resolve) => {
+        sandbox.fetch = (url) => {
+            assert.strictEqual(url, "https://api.dictionaryapi.dev/api/v2/entries/en/apple");
+            return Promise.resolve({
+                status: 200,
+                ok: true,
+                json: () => Promise.resolve([{
+                    word: "apple",
+                    phonetics: [{text: "/apple/", audio: "https://audio.test/apple.mp3"}],
+                    meanings: [{
+                        partOfSpeech: "noun",
+                        definitions: [{
+                            definition: "a round fruit",
+                            example: "an apple a day",
+                            synonyms: ["fruit"]
+                        }]
+                    }]
+                }])
+            });
+        };
+        sandbox.fetch_free_dictionary_definition("Apple", resolve);
+    });
+    assert.strictEqual(definitionResult.found, true);
+    assert.strictEqual(definitionResult.phonetic, "/apple/");
+    assert.strictEqual(definitionResult.meanings[0].definitions[0].definition, "a round fruit");
+
     let uploaded = false;
     let uploadRequest = null;
     sandbox.drive_request = (req, cb) => {
@@ -89,6 +117,33 @@ async function runBackgroundLib() {
     sandbox.open_lookup_popup("https://example.test/word", {}, {left: 320, top: 240});
     assert.strictEqual(sandbox.createdWindow.left, 320);
     assert.strictEqual(sandbox.createdWindow.top, 240);
+
+    const synced = [];
+    const feedback = [];
+    sandbox.chrome.runtime.sendMessage = (message) => feedback.push(message);
+    sandbox.chrome.storage.local.get = (keys, cb) => cb({
+        wd_user_vocabulary: {known: 1},
+        wd_learning_vocabulary: {learn: 1}
+    });
+    sandbox.perform_full_sync = (vocab, done) => {
+        synced.push(vocab);
+        done();
+    };
+    sandbox.sync_user_vocabularies();
+    assert.deepStrictEqual(synced.map((vocab) => vocab.name), ["my_vocabulary", "learning_vocabulary"]);
+    assert.deepStrictEqual(plain(synced[0].added), {known: 1});
+    assert.deepStrictEqual(plain(synced[1].added), {learn: 1});
+    assert.strictEqual(synced[1].storage_key, "wd_learning_vocabulary");
+    assert.strictEqual(synced[1].added_key, "wd_learning_vocab_added");
+    assert.strictEqual(synced[1].deleted_key, "wd_learning_vocab_deleted");
+    assert.deepStrictEqual(plain(feedback.pop()), {sync_feedback: 1});
+
+    let backupQuery = null;
+    sandbox.find_gdrive_id = (query) => {
+        backupQuery = query;
+    };
+    sandbox.backup_vocabulary("dir-1", {name: "learning_vocabulary", all: {}, added: {}, deleted: {}}, () => {});
+    assert.match(backupQuery, /\.learning_vocabulary\.backup/);
 }
 
 function runVocabListPage() {
@@ -152,6 +207,19 @@ function runVocabListPage() {
     };
     nodesById.sortMode.value = "alpha";
     const messages = [];
+    const dictionaryRequests = [];
+    const fakeDefinition = {
+        ok: true,
+        found: true,
+        word: "apple",
+        phonetic: "/apple/",
+        audio: "",
+        meanings: [{
+            partOfSpeech: "noun",
+            definitions: [{definition: "a round fruit", example: "an apple a day", synonyms: []}],
+            synonyms: ["fruit"]
+        }]
+    };
     const sandbox = {
         document: {
             createElement: (tagName) => new Node(tagName),
@@ -166,7 +234,16 @@ function runVocabListPage() {
         },
         chrome: {
             i18n: {getMessage: () => ""},
-            runtime: {sendMessage: (message) => messages.push(message)},
+            runtime: {
+                sendMessage: (message, cb) => {
+                    if (message.wdm_request === "free_dictionary") {
+                        dictionaryRequests.push(message.word);
+                        cb(fakeDefinition);
+                        return;
+                    }
+                    messages.push(message);
+                }
+            },
             storage: {local: {get: () => {}, set: () => {}}},
             tabs: {create: () => {}}
         },
@@ -179,7 +256,11 @@ function runVocabListPage() {
     };
 
     vm.createContext(sandbox);
-    vm.runInContext(fs.readFileSync(path.join(root, "words_discoverer_chrome/black_white.js"), "utf8"), sandbox);
+    vm.runInContext(
+        fs.readFileSync(path.join(root, "words_discoverer_chrome/common_lib.js"), "utf8") + "\n" +
+        fs.readFileSync(path.join(root, "words_discoverer_chrome/black_white.js"), "utf8"),
+        sandbox
+    );
 
     sandbox.list_state.userList = {apple: 1, "a number of": 1};
     sandbox.list_state.dictWords = {apple: ["apple", 4]};
@@ -195,15 +276,18 @@ function runVocabListPage() {
     sandbox.render_vocab_page();
     const entries = findAll(nodesById.vocabularySection, (node) => node.tagName === "DETAILS");
     assert.strictEqual(entries.length, 1);
+    assert.deepStrictEqual(dictionaryRequests, []);
 
     const dictButton = findAll(entries[0], (node) => node.tagName === "BUTTON" && node.textContent === "PopupDict")[0];
     dictButton.click();
-    const lookupPanel = findAll(entries[0], (node) => node.attributes.class === "lookupPanel")[0];
-    assert.strictEqual(lookupPanel.style.display, "block");
-    assert.strictEqual(lookupPanel.wdLookupFrame.src, "https://example.test?q=apple");
-    const fallbackButton = findAll(entries[0], (node) => node.tagName === "BUTTON" && node.textContent === "Open Popup")[0];
-    fallbackButton.click();
     assert.strictEqual(messages.pop().wdm_lookup_popup_url, "https://example.test?q=apple");
+    assert.strictEqual(findAll(entries[0], (node) => node.attributes.class === "lookupPanel").length, 0);
+    entries[0].open = true;
+    entries[0].eventListeners.toggle();
+    assert.deepStrictEqual(dictionaryRequests, ["apple"]);
+    const definitionPanel = findAll(entries[0], (node) => node.attributes.class === "vocabDefinitionPanel")[0];
+    const definitionText = findAll(definitionPanel, (node) => node.attributes.class === "wdDefinitionText")[0];
+    assert.strictEqual(definitionText.textContent, "1. a round fruit");
 
     let markedKnown = null;
     sandbox.add_known_lexeme = (lexeme, cb) => {
@@ -219,6 +303,26 @@ function runVocabListPage() {
     assert.strictEqual(markedKnown, "apple");
     assert.deepStrictEqual(sandbox.list_state.lists.wd_learning_vocabulary, {});
     assert.deepStrictEqual(sandbox.list_state.lists.wd_user_vocabulary, {apple: 1});
+
+    let deletedState = null;
+    let syncCalled = false;
+    sandbox.sync_if_needed = () => {
+        syncCalled = true;
+    };
+    sandbox.chrome.storage.local.get = (keys, cb) => cb({
+        wd_learning_vocabulary: {banana: 1},
+        wd_learning_vocab_added: {banana: 1, old: 1},
+        wd_learning_vocab_deleted: {}
+    });
+    sandbox.chrome.storage.local.set = (state, cb) => {
+        deletedState = state;
+        cb();
+    };
+    sandbox.process_delete_learning_entry("banana");
+    assert.deepStrictEqual(plain(deletedState.wd_learning_vocabulary), {});
+    assert.deepStrictEqual(plain(deletedState.wd_learning_vocab_added), {old: 1});
+    assert.deepStrictEqual(plain(deletedState.wd_learning_vocab_deleted), {banana: 1});
+    assert.strictEqual(syncCalled, true);
 }
 
 (async function main() {
@@ -237,14 +341,26 @@ function runVocabListPage() {
     assert.match(contentScript, /make_learning_hl_style/);
     assert.match(contentScript, /markKnownButton/);
     assert.match(contentScript, /current_is_highlighted/);
+    assert.match(contentScript, /builtinDefinitionButton/);
+    assert.match(contentScript, /free_dictionary/);
     assert.doesNotMatch(contentScript, /addEventListener\('mousemove'/);
 
     const listScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/black_white.js"), "utf8");
     assert.match(listScript, /function render_vocab_page\(\)/);
     assert.match(listScript, /document\.createElement\("details"\)/);
     assert.match(listScript, /wd_learning_vocabulary/);
-    assert.match(listScript, /create_lookup_panel/);
+    assert.match(listScript, /wdm_lookup_popup_url/);
+    assert.match(listScript, /wd_learning_vocab_deleted/);
+    assert.match(listScript, /vocabDefinitionPanel/);
+    assert.doesNotMatch(listScript, /shortDefinition/);
+    assert.doesNotMatch(listScript, /lookupPanel/);
     assert.match(listScript, /importVocabFile/);
+
+    const backgroundScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/background.js"), "utf8");
+    assert.match(backgroundScript, /learning_vocabulary/);
+    assert.match(backgroundScript, /wd_learning_vocab_added/);
+    assert.match(backgroundScript, /wd_learning_vocab_deleted/);
+    assert.match(backgroundScript, /api\.dictionaryapi\.dev/);
 
     const contextScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/context_menu_lib.js"), "utf8");
     assert.match(contextScript, /add_learning_lexeme/);
@@ -264,7 +380,8 @@ function runVocabListPage() {
     assert.strictEqual(fs.existsSync(path.join(root, "words_discoverer_chrome/import.js")), false);
 
     const manifest = JSON.parse(fs.readFileSync(path.join(root, "words_discoverer_chrome/manifest.json"), "utf8"));
-    assert.strictEqual(manifest.version, "2.12.9");
+    assert.strictEqual(manifest.version, "2.12.11");
+    assert.deepStrictEqual(manifest.host_permissions, ["https://api.dictionaryapi.dev/*"]);
     assert.strictEqual(manifest.options_ui.page, "adjust.html");
 
     runVocabListPage();

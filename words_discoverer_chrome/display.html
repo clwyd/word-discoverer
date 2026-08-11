@@ -162,33 +162,31 @@
         flex-wrap: wrap;
         gap: 8px;
     }
-    .lookupPanel {
-        display: none;
+    .vocabDefinitionPanel {
         margin-top: 12px;
+        padding: 10px;
         border: 1px solid var(--line);
-        border-radius: 8px;
-        overflow: hidden;
+        border-radius: 6px;
         background: var(--surface-strong);
+        line-height: 1.45;
     }
-    .lookupBar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 8px;
-        border-bottom: 1px solid var(--line);
+    .wdDefinitionPhonetic,
+    .wdDefinitionPart,
+    .wdDefinitionText,
+    .wdDefinitionExample,
+    .wdDefinitionSynonyms,
+    .wdDefinitionEmpty {
+        margin-bottom: 6px;
     }
-    .lookupTitle {
+    .wdDefinitionPart {
+        color: var(--accent-strong);
+        font-weight: 700;
+    }
+    .wdDefinitionExample,
+    .wdDefinitionSynonyms,
+    .wdDefinitionPhonetic,
+    .wdDefinitionEmpty {
         color: var(--muted);
-        font-weight: 600;
-        overflow-wrap: anywhere;
-    }
-    .lookupFrame {
-        display: block;
-        width: 100%;
-        height: min(560px, 70vh);
-        border: 0;
-        background: white;
     }
     .empty {
         border: 1px dashed var(--line);

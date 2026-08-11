@@ -236,6 +236,21 @@
   "audioButton": {
     "message": "发音"
   },
+  "builtinDefinitionButton": {
+    "message": "内置释义"
+  },
+  "definitionLoading": {
+    "message": "正在加载释义..."
+  },
+  "definitionNone": {
+    "message": "未找到释义"
+  },
+  "definitionUnavailable": {
+    "message": "释义暂不可用"
+  },
+  "definitionSynonyms": {
+    "message": "同义词"
+  },
   "dictTranslateGoogle": {
     "message": "在 Google 中翻译为 {0}"
   },
@@ -477,7 +492,7 @@
     "message": "如果你在多个浏览器中使用 Word Discoverer，它们的词汇表会通过 Google Drive 同步。"
   },
   "syncDescription3": {
-    "message": "Word Discoverer 文件会保存在 Google Drive 根目录的 “Words Discoverer Sync” 文件夹中。你的词汇表在 “my_vocabulary.txt” 文件里。“.my_vocabulary.backup” 是技术文件，用来保存新增和删除记录，保证合并更安全。"
+    "message": "Word Discoverer 文件会保存在 Google Drive 根目录的 “Words Discoverer Sync” 文件夹中。已掌握词汇在 “my_vocabulary.txt” 文件里，学习中词汇在 “learning_vocabulary.txt” 文件里。隐藏的 backup 文件用来保存新增和删除记录，保证合并更安全。"
   },
   "syncDescription4": {
     "message": "要停止同步，请在启用同步后点击“停止同步”按钮。"

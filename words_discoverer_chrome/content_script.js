@@ -137,6 +137,7 @@ function renderBubble() {
     document.getElementById("wd_selection_bubble_action").textContent = is_highlighted
         ? (chrome.i18n.getMessage("markKnownButton") || "Mark Known")
         : (chrome.i18n.getMessage("menuItem") || "Add to Learning");
+    reset_bubble_definition();
     bubbleDOM.style.display = 'block';
     var point = node_to_render_point;
     if (!point) {
@@ -540,6 +541,54 @@ function bubble_handle_tts(lexeme) {
 }
 
 
+function content_msg(key, fallback) {
+    return chrome.i18n.getMessage(key) || fallback;
+}
+
+
+function request_free_dictionary_definition(word, result_handler) {
+    chrome.runtime.sendMessage({wdm_request: "free_dictionary", word: word}, function(response) {
+        result_handler(response || {ok: false, found: false, word: word, phonetic: "", audio: "", meanings: []});
+    });
+}
+
+
+function reset_bubble_definition() {
+    var panel = document.getElementById("wd_selection_bubble_definition");
+    if (!panel) {
+        return;
+    }
+    panel.style.display = "none";
+    panel.wdDefinitionWord = "";
+    while (panel.firstChild) {
+        panel.removeChild(panel.firstChild);
+    }
+}
+
+
+function toggle_bubble_definition() {
+    var panel = document.getElementById("wd_selection_bubble_definition");
+    if (!panel) {
+        return;
+    }
+    if (panel.style.display === "block") {
+        panel.style.display = "none";
+        return;
+    }
+    panel.style.display = "block";
+    if (panel.wdDefinitionWord === current_lexeme) {
+        return;
+    }
+    panel.wdDefinitionWord = current_lexeme;
+    panel.textContent = content_msg("definitionLoading", "Loading definition...");
+    request_free_dictionary_definition(current_lexeme, function(definition) {
+        if (panel.wdDefinitionWord === current_lexeme) {
+            render_free_dictionary_definition(panel, definition, chrome.i18n.getMessage);
+        }
+    });
+}
+
+
 function bubble_handle_add_result(report, lemma) {
     if (report === "ok") {
         user_vocabulary = user_vocabulary || {};
@@ -605,6 +654,18 @@ function create_bubble() {
         bubble_handle_tts(current_lexeme);
     });
     bubbleDOM.appendChild(speakButton);
+
+    var definitionButton = document.createElement('button');
+    definitionButton.setAttribute('class', 'wdAddButton');
+    definitionButton.textContent = content_msg("builtinDefinitionButton", "Built-in Definition");
+    definitionButton.style.marginBottom = "4px";
+    definitionButton.addEventListener("click", toggle_bubble_definition);
+    bubbleDOM.appendChild(definitionButton);
+
+    var definitionPanel = document.createElement('div');
+    definitionPanel.setAttribute('class', 'wdDefinitionPanel');
+    definitionPanel.setAttribute('id', 'wd_selection_bubble_definition');
+    bubbleDOM.appendChild(definitionPanel);
 
     //dictPairs = makeDictionaryPairs();
     var dictPairs = wd_online_dicts;

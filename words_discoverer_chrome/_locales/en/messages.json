@@ -236,6 +236,21 @@
   "audioButton": {
     "message": "Audio"
   },
+  "builtinDefinitionButton": {
+    "message": "Built-in Definition"
+  },
+  "definitionLoading": {
+    "message": "Loading definition..."
+  },
+  "definitionNone": {
+    "message": "No definition found"
+  },
+  "definitionUnavailable": {
+    "message": "Definition unavailable"
+  },
+  "definitionSynonyms": {
+    "message": "Synonyms"
+  },
   "dictTranslateGoogle": {
     "message": "Translate to {0} in Google"
   },
@@ -477,7 +492,7 @@
     "message": "If you use Word Discoverer in multiple browsers, their vocabularies are synchronized through your Google Drive."
   },
   "syncDescription3": {
-    "message": "Word Discoverer files are saved in the \"Words Discoverer Sync\" folder in your Google Drive root. Your vocabulary is stored in \"my_vocabulary.txt\". The \".my_vocabulary.backup\" file stores added and deleted words for merge safety."
+    "message": "Word Discoverer files are saved in the \"Words Discoverer Sync\" folder in your Google Drive root. Known words are stored in \"my_vocabulary.txt\" and learning words are stored in \"learning_vocabulary.txt\". The hidden backup files store added and deleted words for merge safety."
   },
   "syncDescription4": {
     "message": "To stop synchronization, press the Stop Sync button after sync has been enabled."

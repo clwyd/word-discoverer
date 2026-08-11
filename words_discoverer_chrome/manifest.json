@@ -4,7 +4,7 @@
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
-  "version": "2.12.9",
+  "version": "2.12.11",
   "icons": {
     "48": "result48.png",
     "128": "icon_128.png"
@@ -28,6 +28,9 @@
     "tts",
     "identity",
     "activeTab"
+  ],
+  "host_permissions": [
+    "https://api.dictionaryapi.dev/*"
   ],
   "optional_host_permissions": [
     "https://www.googleapis.com/*"
