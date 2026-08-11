@@ -156,7 +156,7 @@ function serialize_vocabulary(entries) {
 
 
 function parse_vocabulary(text) {
-    // code duplication with parse_vocabulary in import.js
+    // same text-file format as local vocabulary import
     var lines = text.split('\n');
     var found = [];
     for (var i = 0; i < lines.length; ++i) {
