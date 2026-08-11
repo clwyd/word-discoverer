@@ -195,26 +195,28 @@ function open_lookup_popup(url) {
 
 var free_definition_cache = {};
 
-function request_free_dictionary_definition(word, result_handler) {
-    if (free_definition_cache.hasOwnProperty(word)) {
+function request_free_dictionary_definition(word, force_refresh, result_handler) {
+    if (!force_refresh && free_definition_cache.hasOwnProperty(word)) {
         result_handler(free_definition_cache[word]);
         return;
     }
-    chrome.runtime.sendMessage({wdm_request: "free_dictionary", word: word}, function(response) {
+    chrome.runtime.sendMessage({wdm_request: "free_dictionary", word: word, force_refresh: force_refresh}, function(response) {
         var definition = response || {ok: false, found: false, word: word, phonetic: "", audio: "", meanings: []};
         free_definition_cache[word] = definition;
         result_handler(definition);
     });
 }
 
-function load_full_definition(word, node) {
-    if (node.wdDefinitionLoaded) {
+function load_full_definition(word, node, force_refresh) {
+    if (node.wdDefinitionLoaded && !force_refresh) {
         return;
     }
     node.wdDefinitionLoaded = true;
     node.textContent = msg("definitionLoading", "Loading definition...");
-    request_free_dictionary_definition(word, function(definition) {
-        render_free_dictionary_definition(node, definition, chrome.i18n.getMessage);
+    request_free_dictionary_definition(word, force_refresh, function(definition) {
+        render_free_dictionary_definition(node, definition, chrome.i18n.getMessage, function() {
+            load_full_definition(word, node, true);
+        });
     });
 }
 
@@ -279,6 +281,10 @@ function create_vocab_entry(info) {
     for (var i = 0; i < dictPairs.length; ++i) {
         (function(dict) {
             actions.appendChild(create_button(dict.title, "", function() {
+                if (is_free_dictionary_url(dict.url)) {
+                    load_full_definition(info.key, definitionPanel, true);
+                    return;
+                }
                 open_lookup_popup(get_dict_definition_url(dict.url, info.key));
             }));
         })(dictPairs[i]);

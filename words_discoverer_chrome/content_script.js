@@ -546,8 +546,8 @@ function content_msg(key, fallback) {
 }
 
 
-function request_free_dictionary_definition(word, result_handler) {
-    chrome.runtime.sendMessage({wdm_request: "free_dictionary", word: word}, function(response) {
+function request_free_dictionary_definition(word, force_refresh, result_handler) {
+    chrome.runtime.sendMessage({wdm_request: "free_dictionary", word: word, force_refresh: force_refresh}, function(response) {
         result_handler(response || {ok: false, found: false, word: word, phonetic: "", audio: "", meanings: []});
     });
 }
@@ -566,6 +566,24 @@ function reset_bubble_definition() {
 }
 
 
+function load_bubble_definition(force_refresh) {
+    var panel = document.getElementById("wd_selection_bubble_definition");
+    if (!panel) {
+        return;
+    }
+    panel.style.display = "block";
+    panel.wdDefinitionWord = current_lexeme;
+    panel.textContent = content_msg("definitionLoading", "Loading definition...");
+    request_free_dictionary_definition(current_lexeme, force_refresh, function(definition) {
+        if (panel.wdDefinitionWord === current_lexeme) {
+            render_free_dictionary_definition(panel, definition, chrome.i18n.getMessage, function() {
+                load_bubble_definition(true);
+            });
+        }
+    });
+}
+
+
 function toggle_bubble_definition() {
     var panel = document.getElementById("wd_selection_bubble_definition");
     if (!panel) {
@@ -579,13 +597,44 @@ function toggle_bubble_definition() {
     if (panel.wdDefinitionWord === current_lexeme) {
         return;
     }
-    panel.wdDefinitionWord = current_lexeme;
-    panel.textContent = content_msg("definitionLoading", "Loading definition...");
-    request_free_dictionary_definition(current_lexeme, function(definition) {
-        if (panel.wdDefinitionWord === current_lexeme) {
-            render_free_dictionary_definition(panel, definition, chrome.i18n.getMessage);
+    load_bubble_definition(false);
+}
+
+
+function show_free_dictionary_bubble(word) {
+    var bubbleDOM = document.getElementById("wd_selection_bubble");
+    if (!bubbleDOM) {
+        return;
+    }
+    current_lexeme = word;
+    current_is_highlighted = false;
+    document.getElementById("wd_selection_bubble_text").textContent = limit_text_len(word);
+    document.getElementById("wd_selection_bubble_freq").textContent = "n/a";
+    document.getElementById("wd_selection_bubble_action").textContent = chrome.i18n.getMessage("menuItem") || "Add to Learning";
+    reset_bubble_definition();
+    bubbleDOM.style.display = "block";
+    var point = {x: Math.floor(window.innerWidth / 2), y: Math.floor(window.innerHeight / 3)};
+    var sel = window.getSelection();
+    if (sel && sel.rangeCount) {
+        var rect = sel.getRangeAt(0).getBoundingClientRect();
+        if (rect && rect.bottom) {
+            point = {x: Math.floor((rect.left + rect.right) / 2), y: rect.bottom};
         }
-    });
+    }
+    var width = bubbleDOM.offsetWidth || 280;
+    var height = bubbleDOM.offsetHeight || 160;
+    var left = point.x + 12;
+    if (left + width + 8 > window.innerWidth) {
+        left = point.x - width - 12;
+    }
+    var top = point.y + 12;
+    if (top + height + 8 > window.innerHeight) {
+        top = point.y - height - 12;
+    }
+    bubbleDOM.style.left = Math.max(5, left) + "px";
+    bubbleDOM.style.top = Math.max(5, top) + "px";
+    rendered_node_id = null;
+    load_bubble_definition(false);
 }
 
 
@@ -655,13 +704,6 @@ function create_bubble() {
     });
     bubbleDOM.appendChild(speakButton);
 
-    var definitionButton = document.createElement('button');
-    definitionButton.setAttribute('class', 'wdAddButton');
-    definitionButton.textContent = content_msg("builtinDefinitionButton", "Built-in Definition");
-    definitionButton.style.marginBottom = "4px";
-    definitionButton.addEventListener("click", toggle_bubble_definition);
-    bubbleDOM.appendChild(definitionButton);
-
     var definitionPanel = document.createElement('div');
     definitionPanel.setAttribute('class', 'wdDefinitionPanel');
     definitionPanel.setAttribute('id', 'wd_selection_bubble_definition');
@@ -677,6 +719,10 @@ function create_bubble() {
         dictButton.addEventListener("click", function (e) {
             var target = e.target;
             var dictUrl = target.getAttribute('wdDictRefUrl');
+            if (is_free_dictionary_url(dictUrl)) {
+                toggle_bubble_definition();
+                return;
+            }
             var newTabUrl = get_dict_definition_url(dictUrl, current_lexeme);
             chrome.runtime.sendMessage({
                 wdm_lookup_popup_url: newTabUrl,
@@ -719,6 +765,8 @@ function initForPage() {
             mark_learning(learning_lemma);
             mark_matching_unhighlighted_nodes_learning(learning_lemma);
             doHighlightText(textNodesUnder(document.body));
+        } else if (request.wdm_show_free_dictionary) {
+            show_free_dictionary_bubble(request.wdm_show_free_dictionary);
         }
     });
 

@@ -250,6 +250,11 @@ function process_test_old_dict(e) {
     if (!btn_id.startsWith('testDictBtn_'))
         return;
     var btn_no = parseInt(btn_id.split('_')[1]);
+    if (is_free_dictionary_url(wd_online_dicts[btn_no].url)) {
+        chrome.tabs.create({'url': 'https://dictionaryapi.dev/'}, function (tab) {
+        });
+        return;
+    }
     url = get_dict_definition_url(wd_online_dicts[btn_no].url, 'test');
     chrome.tabs.create({'url': url}, function (tab) {
     });
@@ -432,6 +437,11 @@ function process_display() {
             wd_hl_settings = result.wd_hl_settings;
             wd_hover_settings = result.wd_hover_settings;
             wd_online_dicts = result.wd_online_dicts;
+            if (typeof wd_online_dicts !== 'undefined') {
+                wd_online_dicts = add_missing_builtin_dicts(wd_online_dicts);
+                chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
+                initContextMenus(wd_online_dicts);
+            }
             wd_enable_tts = result.wd_enable_tts ? true : false;
 
             var wd_developer_mode = result.wd_developer_mode;

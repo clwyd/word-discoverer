@@ -197,6 +197,13 @@ function google_translate_url(targetLang) {
 }
 
 function showDefinition(dictUrl, text, tab) {
+    if (is_free_dictionary_url(dictUrl)) {
+        if (tab && typeof tab.id === "number") {
+            chrome.tabs.sendMessage(tab.id, {wdm_show_free_dictionary: text}, function() {
+            });
+        }
+        return;
+    }
     var fullUrl = get_dict_definition_url(dictUrl, text);
     if (typeof open_lookup_popup === "function") {
         open_lookup_popup(fullUrl, {tab: tab});
@@ -282,9 +289,21 @@ function make_default_online_dicts() {
             url: google_translate_url(google_translate_lang(rawUiLang))
         });
     }
+    result.push({title: chrome.i18n.getMessage("dictFreeDictionary") || "Free Dictionary", url: FREE_DICTIONARY_URL});
     result.push({title: chrome.i18n.getMessage("dictMerriamWebster"), url: "https://www.merriam-webster.com/dictionary/"});
     result.push({title: chrome.i18n.getMessage("dictGoogleDefinition"), url: "https://encrypted.google.com/search?hl=en&gl=en&q=define:"});
     result.push({title: chrome.i18n.getMessage("dictGoogleImages"), url: "https://encrypted.google.com/search?hl=en&gl=en&tbm=isch&q="});
+    return result;
+}
+
+function add_missing_builtin_dicts(dictPairs) {
+    for (var i = 0; i < dictPairs.length; ++i) {
+        if (is_free_dictionary_url(dictPairs[i].url)) {
+            return dictPairs;
+        }
+    }
+    var result = dictPairs.slice();
+    result.unshift({title: chrome.i18n.getMessage("dictFreeDictionary") || "Free Dictionary", url: FREE_DICTIONARY_URL});
     return result;
 }
 

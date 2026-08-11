@@ -242,6 +242,9 @@
   "definitionLoading": {
     "message": "正在加载释义..."
   },
+  "definitionRefresh": {
+    "message": "刷新"
+  },
   "definitionNone": {
     "message": "未找到释义"
   },
@@ -253,6 +256,9 @@
   },
   "dictTranslateGoogle": {
     "message": "在 Google 中翻译为 {0}"
+  },
+  "dictFreeDictionary": {
+    "message": "Free Dictionary 内置释义"
   },
   "dictMerriamWebster": {
     "message": "在 Merriam-Webster 中查询释义"

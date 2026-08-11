@@ -242,6 +242,9 @@
   "definitionLoading": {
     "message": "Loading definition..."
   },
+  "definitionRefresh": {
+    "message": "Refresh"
+  },
   "definitionNone": {
     "message": "No definition found"
   },
@@ -253,6 +256,9 @@
   },
   "dictTranslateGoogle": {
     "message": "Translate to {0} in Google"
+  },
+  "dictFreeDictionary": {
+    "message": "Free Dictionary"
   },
   "dictMerriamWebster": {
     "message": "Define in Merriam-Webster"

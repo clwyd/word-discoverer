@@ -150,7 +150,8 @@
 .wdDefinitionText,
 .wdDefinitionExample,
 .wdDefinitionSynonyms,
-.wdDefinitionEmpty {
+.wdDefinitionEmpty,
+.wdDefinitionRefresh {
     margin: 0 0 5px 0 !important;
     padding: 0 !important;
     color: #111 !important;
@@ -158,6 +159,16 @@
     font-size: 12px !important;
     line-height: 1.35 !important;
     text-align: left !important;
+}
+
+.wdDefinitionRefresh {
+    height: 22px !important;
+    padding: 0 7px !important;
+    border: 1px solid #8a8a8a !important;
+    border-radius: 4px !important;
+    background: white !important;
+    cursor: pointer !important;
+    font-weight: bold !important;
 }
 
 .wdDefinitionPart {

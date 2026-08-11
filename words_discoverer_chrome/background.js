@@ -435,13 +435,13 @@ function open_lookup_popup(url, sender, position) {
 }
 
 
-function fetch_free_dictionary_definition(word, sendResponse) {
+function fetch_free_dictionary_definition(word, sendResponse, force_refresh) {
     word = (word || "").toLowerCase().trim();
     if (!word || word.length > 100) {
         sendResponse({ok: false, found: false});
         return;
     }
-    if (free_dictionary_cache.hasOwnProperty(word)) {
+    if (!force_refresh && free_dictionary_cache.hasOwnProperty(word)) {
         sendResponse(free_dictionary_cache[word]);
         return;
     }
@@ -510,7 +510,7 @@ function initialize_extension() {
         } else if (request.wdm_lookup_popup_url) {
             open_lookup_popup(request.wdm_lookup_popup_url, sender, request.wdm_popup_position);
         } else if (request.wdm_request == "free_dictionary") {
-            fetch_free_dictionary_definition(request.word, sendResponse);
+            fetch_free_dictionary_definition(request.word, sendResponse, request.force_refresh);
             return true;
         } else if (request.wdm_request == "gd_sync") {
             start_sync_sequence(request.interactive_mode);
@@ -537,6 +537,9 @@ function initialize_extension() {
         var wd_online_dicts = result.wd_online_dicts;
         if (typeof wd_online_dicts == 'undefined') {
             wd_online_dicts = make_default_online_dicts();
+            chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
+        } else {
+            wd_online_dicts = add_missing_builtin_dicts(wd_online_dicts);
             chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
         }
         initContextMenus(wd_online_dicts);

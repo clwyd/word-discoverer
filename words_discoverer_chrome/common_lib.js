@@ -46,6 +46,13 @@ function get_vocabulary_filename(list_name) {
 }
 
 
+var FREE_DICTIONARY_URL = "wd-builtin://free-dictionary";
+
+function is_free_dictionary_url(url) {
+    return url === FREE_DICTIONARY_URL;
+}
+
+
 function parse_vocabulary(text) {
     var lines = text.split('\n');
     var found = [];
@@ -106,7 +113,7 @@ function normalize_free_dictionary_response(word, data) {
 }
 
 
-function render_free_dictionary_definition(container, definition, get_message) {
+function render_free_dictionary_definition(container, definition, get_message, refresh_handler) {
     while (container.firstChild) {
         container.removeChild(container.firstChild);
     }
@@ -119,6 +126,13 @@ function render_free_dictionary_definition(container, definition, get_message) {
         node.textContent = text;
         container.appendChild(node);
         return node;
+    }
+    if (refresh_handler) {
+        var refreshButton = document.createElement("button");
+        refreshButton.setAttribute("class", "wdDefinitionRefresh");
+        refreshButton.textContent = msg("definitionRefresh", "Refresh");
+        refreshButton.addEventListener("click", refresh_handler);
+        container.appendChild(refreshButton);
     }
     if (!definition || !definition.ok) {
         append_text("wdDefinitionEmpty", msg("definitionUnavailable", "Definition unavailable"));

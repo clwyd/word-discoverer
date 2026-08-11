@@ -13,16 +13,31 @@ function runContextLib() {
                 getUILanguage: () => "zh-CN",
                 getMessage: (key) => ({
                     dictTranslateGoogle: "Translate to {0} in Google",
+                    dictFreeDictionary: "Free Dictionary",
                     dictMerriamWebster: "Define in Merriam-Webster",
                     dictGoogleDefinition: "Define in Google",
                     dictGoogleImages: "View pictures in Google"
                 }[key] || key)
+            },
+            tabs: {
+                sendMessage: (tabId, message) => {
+                    sandbox.sentTabMessage = {tabId, message};
+                }
+            },
+            runtime: {
+                sendMessage: (message) => {
+                    sandbox.sentRuntimeMessage = message;
+                }
             }
         },
         spformat: (fmt, value) => fmt.replace("{0}", value)
     };
     vm.createContext(sandbox);
-    vm.runInContext(fs.readFileSync(path.join(root, "words_discoverer_chrome/context_menu_lib.js"), "utf8"), sandbox);
+    vm.runInContext(
+        fs.readFileSync(path.join(root, "words_discoverer_chrome/common_lib.js"), "utf8") + "\n" +
+        fs.readFileSync(path.join(root, "words_discoverer_chrome/context_menu_lib.js"), "utf8"),
+        sandbox
+    );
     return sandbox;
 }
 
@@ -91,7 +106,7 @@ async function runBackgroundLib() {
                 }])
             });
         };
-        sandbox.fetch_free_dictionary_definition("Apple", resolve);
+        sandbox.fetch_free_dictionary_definition("Apple", resolve, false);
     });
     assert.strictEqual(definitionResult.found, true);
     assert.strictEqual(definitionResult.phonetic, "/apple/");
@@ -237,7 +252,7 @@ function runVocabListPage() {
             runtime: {
                 sendMessage: (message, cb) => {
                     if (message.wdm_request === "free_dictionary") {
-                        dictionaryRequests.push(message.word);
+                        dictionaryRequests.push({word: message.word, force: message.force_refresh ? true : false});
                         cb(fakeDefinition);
                         return;
                     }
@@ -265,7 +280,10 @@ function runVocabListPage() {
     sandbox.list_state.userList = {apple: 1, "a number of": 1};
     sandbox.list_state.dictWords = {apple: ["apple", 4]};
     sandbox.list_state.dictIdioms = {"a number of": "a number of"};
-    sandbox.list_state.onlineDicts = [{title: "PopupDict", url: "https://example.test?q="}];
+    sandbox.list_state.onlineDicts = [
+        {title: "Free Dictionary", url: sandbox.FREE_DICTIONARY_URL},
+        {title: "PopupDict", url: "https://example.test?q="}
+    ];
     sandbox.list_state.wordMaxRank = 100;
     sandbox.render_vocab_page();
 
@@ -284,10 +302,13 @@ function runVocabListPage() {
     assert.strictEqual(findAll(entries[0], (node) => node.attributes.class === "lookupPanel").length, 0);
     entries[0].open = true;
     entries[0].eventListeners.toggle();
-    assert.deepStrictEqual(dictionaryRequests, ["apple"]);
+    assert.deepStrictEqual(dictionaryRequests, [{word: "apple", force: false}]);
     const definitionPanel = findAll(entries[0], (node) => node.attributes.class === "vocabDefinitionPanel")[0];
     const definitionText = findAll(definitionPanel, (node) => node.attributes.class === "wdDefinitionText")[0];
     assert.strictEqual(definitionText.textContent, "1. a round fruit");
+    const refreshButton = findAll(definitionPanel, (node) => node.attributes.class === "wdDefinitionRefresh")[0];
+    refreshButton.click();
+    assert.deepStrictEqual(dictionaryRequests, [{word: "apple", force: false}, {word: "apple", force: true}]);
 
     let markedKnown = null;
     sandbox.add_known_lexeme = (lexeme, cb) => {
@@ -332,6 +353,10 @@ function runVocabListPage() {
     assert.strictEqual(ctx.get_dict_definition_url(ctx.google_translate_url("zh-CN"), "a number of"), "https://translate.google.com/?hl=zh-CN&sl=en&tl=zh-CN&op=translate&text=a%20number%20of");
 
     assert.strictEqual(ctx.make_default_online_dicts()[0].url, "https://translate.google.com/?hl=zh-CN&sl=en&tl=zh-CN&op=translate&text=");
+    assert.strictEqual(ctx.make_default_online_dicts()[1].url, ctx.FREE_DICTIONARY_URL);
+    assert.strictEqual(ctx.add_missing_builtin_dicts([{title: "PopupDict", url: "https://example.test?q="}])[0].url, ctx.FREE_DICTIONARY_URL);
+    ctx.showDefinition(ctx.FREE_DICTIONARY_URL, "apple", {id: 7});
+    assert.deepStrictEqual(plain(ctx.sentTabMessage), {tabId: 7, message: {wdm_show_free_dictionary: "apple"}});
 
     const contentScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/content_script.js"), "utf8");
     assert.match(contentScript, /bubbleDOM\.addEventListener\("mousedown"[\s\S]*?e\.stopPropagation\(\);/);
@@ -341,8 +366,9 @@ function runVocabListPage() {
     assert.match(contentScript, /make_learning_hl_style/);
     assert.match(contentScript, /markKnownButton/);
     assert.match(contentScript, /current_is_highlighted/);
-    assert.match(contentScript, /builtinDefinitionButton/);
     assert.match(contentScript, /free_dictionary/);
+    assert.match(contentScript, /wdm_show_free_dictionary/);
+    assert.match(contentScript, /is_free_dictionary_url/);
     assert.doesNotMatch(contentScript, /addEventListener\('mousemove'/);
 
     const listScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/black_white.js"), "utf8");
@@ -361,12 +387,15 @@ function runVocabListPage() {
     assert.match(backgroundScript, /wd_learning_vocab_added/);
     assert.match(backgroundScript, /wd_learning_vocab_deleted/);
     assert.match(backgroundScript, /api\.dictionaryapi\.dev/);
+    assert.match(backgroundScript, /force_refresh/);
 
     const contextScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/context_menu_lib.js"), "utf8");
     assert.match(contextScript, /add_learning_lexeme/);
     assert.match(contextScript, /add_known_lexeme/);
     assert.match(contextScript, /vocab_select_known/);
     assert.match(contextScript, /wdm_mark_learning/);
+    assert.match(contextScript, /dictFreeDictionary/);
+    assert.match(contextScript, /wdm_show_free_dictionary/);
     assert.doesNotMatch(contextScript, /chrome\.tabs\.create\(\{'url': fullUrl\}/);
 
     const popupScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/popup.js"), "utf8");
@@ -375,12 +404,13 @@ function runVocabListPage() {
     const adjustScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/adjust.js"), "utf8");
     assert.match(adjustScript, /loadVocabFile/);
     assert.match(adjustScript, /open_google_drive/);
+    assert.match(adjustScript, /add_missing_builtin_dicts/);
     assert.doesNotMatch(adjustScript, /import\.html/);
     assert.strictEqual(fs.existsSync(path.join(root, "words_discoverer_chrome/import.html")), false);
     assert.strictEqual(fs.existsSync(path.join(root, "words_discoverer_chrome/import.js")), false);
 
     const manifest = JSON.parse(fs.readFileSync(path.join(root, "words_discoverer_chrome/manifest.json"), "utf8"));
-    assert.strictEqual(manifest.version, "2.12.11");
+    assert.strictEqual(manifest.version, "2.12.12");
     assert.deepStrictEqual(manifest.host_permissions, ["https://api.dictionaryapi.dev/*"]);
     assert.strictEqual(manifest.options_ui.page, "adjust.html");
 
