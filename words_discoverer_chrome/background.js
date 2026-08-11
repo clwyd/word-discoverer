@@ -444,7 +444,7 @@ function initialize_extension() {
         }
     });
 
-    chrome.storage.local.get(['words_discoverer_eng_dict', 'wd_hl_settings', 'wd_online_dicts', 'wd_hover_settings', 'wd_idioms', 'wd_show_percents', 'wd_is_enabled', 'wd_user_vocabulary', 'wd_black_list', 'wd_white_list', 'wd_gd_sync_enabled', 'wd_enable_tts'], function (result) {
+    chrome.storage.local.get(['words_discoverer_eng_dict', 'wd_hl_settings', 'wd_online_dicts', 'wd_hover_settings', 'wd_idioms', 'wd_show_percents', 'wd_is_enabled', 'wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_black_list', 'wd_white_list', 'wd_gd_sync_enabled', 'wd_enable_tts'], function (result) {
         load_eng_dictionary();
         load_idioms();
         wd_hl_settings = result.wd_hl_settings;
@@ -479,6 +479,10 @@ function initialize_extension() {
         user_vocabulary = result.wd_user_vocabulary;
         if (typeof user_vocabulary === 'undefined') {
             chrome.storage.local.set({"wd_user_vocabulary": {}});
+        }
+        var learning_vocabulary = result.wd_learning_vocabulary;
+        if (typeof learning_vocabulary === 'undefined') {
+            chrome.storage.local.set({"wd_learning_vocabulary": {}});
         }
         black_list = result.wd_black_list;
         if (typeof black_list === 'undefined') {

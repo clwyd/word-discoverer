@@ -1,7 +1,8 @@
-var list_section_names = {'wd_black_list': 'blackListSection', 'wd_white_list': 'whiteListSection', 'wd_user_vocabulary': 'vocabularySection'};
+var list_section_names = {'wd_black_list': 'blackListSection', 'wd_white_list': 'whiteListSection', 'wd_user_vocabulary': 'vocabularySection', 'wd_learning_vocabulary': 'vocabularySection'};
 var list_state = {
     listName: null,
     userList: {},
+    lists: {},
     dictWords: {},
     dictIdioms: {},
     onlineDicts: [],
@@ -22,6 +23,10 @@ function process_delete_simple(list_name, key) {
 }
 
 function process_delete_vocab_entry(key) {
+    if (list_state.listName === 'wd_learning_vocabulary') {
+        process_delete_learning_entry(key);
+        return;
+    }
     chrome.storage.local.get(['wd_user_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'], function(result) {
         var user_vocabulary = result.wd_user_vocabulary || {};
         var wd_user_vocab_added = result.wd_user_vocab_added;
@@ -37,7 +42,30 @@ function process_delete_vocab_entry(key) {
             new_state['wd_user_vocab_deleted'] = wd_user_vocab_deleted;
         }
         chrome.storage.local.set(new_state, sync_if_needed);
+        list_state.lists.wd_user_vocabulary = user_vocabulary;
         show_user_list('wd_user_vocabulary', user_vocabulary);
+    });
+}
+
+function process_delete_learning_entry(key) {
+    chrome.storage.local.get(['wd_learning_vocabulary'], function(result) {
+        var learning_vocabulary = result.wd_learning_vocabulary || {};
+        delete learning_vocabulary[key];
+        chrome.storage.local.set({'wd_learning_vocabulary': learning_vocabulary});
+        list_state.lists.wd_learning_vocabulary = learning_vocabulary;
+        show_user_list('wd_learning_vocabulary', learning_vocabulary);
+    });
+}
+
+function process_mark_known_entry(key) {
+    add_known_lexeme(key, function(report, lemma) {
+        if (report !== "ok")
+            return;
+        list_state.lists.wd_learning_vocabulary = list_state.lists.wd_learning_vocabulary || {};
+        list_state.lists.wd_user_vocabulary = list_state.lists.wd_user_vocabulary || {};
+        delete list_state.lists.wd_learning_vocabulary[lemma];
+        list_state.lists.wd_user_vocabulary[lemma] = 1;
+        show_user_list(list_state.listName, list_state.lists[list_state.listName] || {});
     });
 }
 
@@ -197,6 +225,11 @@ function create_vocab_entry(info) {
 
     var actions = document.createElement("div");
     actions.setAttribute("class", "actions");
+    if (list_state.listName === "wd_learning_vocabulary") {
+        actions.appendChild(create_button(msg("markKnownButton", "Mark Known"), "primary", function() {
+            process_mark_known_entry(info.key);
+        }));
+    }
     actions.appendChild(create_button(msg("audioButton", "Speak"), "", function() {
         chrome.runtime.sendMessage({type: "tts_speak", word: info.key});
     }));
@@ -246,10 +279,12 @@ function export_vocabulary() {
     var keys = get_keys(list_state.userList);
     keys.sort();
     var blob = new Blob([keys.join('\r\n')], {type: "text/plain;charset=utf-8"});
-    saveAs(blob, "my_vocabulary.txt", true);
+    var filename = list_state.listName === "wd_learning_vocabulary" ? "learning_vocabulary.txt" : "my_vocabulary.txt";
+    saveAs(blob, filename, true);
 }
 
 function init_vocab_controls() {
+    var listMode = document.getElementById("listMode");
     var search = document.getElementById("listSearch");
     var sort = document.getElementById("sortMode");
     var exportButton = document.getElementById("exportVocab");
@@ -259,6 +294,11 @@ function init_vocab_controls() {
     }
     if (sort) {
         sort.addEventListener("change", render_vocab_page);
+    }
+    if (listMode) {
+        listMode.addEventListener("change", function() {
+            show_user_list(listMode.value, list_state.lists[listMode.value] || {});
+        });
     }
     if (exportButton) {
         exportButton.addEventListener("click", export_vocabulary);
@@ -292,7 +332,11 @@ function render_simple_list(list_name, user_list) {
 function show_user_list(list_name, user_list) {
     list_state.listName = list_name;
     list_state.userList = user_list || {};
-    if (list_name === "wd_user_vocabulary" && document.getElementById("listSearch")) {
+    var listMode = document.getElementById("listMode");
+    if (listMode && listMode.value !== list_name) {
+        listMode.value = list_name;
+    }
+    if ((list_name === "wd_user_vocabulary" || list_name === "wd_learning_vocabulary") && document.getElementById("listSearch")) {
         render_vocab_page();
         return;
     }
@@ -302,8 +346,8 @@ function show_user_list(list_name, user_list) {
 function process_display() {
     var list_name = get_list_name();
     var req_keys = [list_name];
-    if (list_name === "wd_user_vocabulary" && document.getElementById("listSearch")) {
-        req_keys = ['wd_user_vocabulary', 'words_discoverer_eng_dict', 'wd_idioms', 'wd_online_dicts', 'wd_word_max_rank'];
+    if ((list_name === "wd_user_vocabulary" || list_name === "wd_learning_vocabulary") && document.getElementById("listSearch")) {
+        req_keys = ['wd_user_vocabulary', 'wd_learning_vocabulary', 'words_discoverer_eng_dict', 'wd_idioms', 'wd_online_dicts', 'wd_word_max_rank'];
         init_vocab_controls();
     }
     chrome.storage.local.get(req_keys, function(result) {
@@ -311,6 +355,8 @@ function process_display() {
         list_state.dictIdioms = result.wd_idioms || {};
         list_state.onlineDicts = result.wd_online_dicts || [];
         list_state.wordMaxRank = result.wd_word_max_rank || 0;
+        list_state.lists.wd_user_vocabulary = result.wd_user_vocabulary || {};
+        list_state.lists.wd_learning_vocabulary = result.wd_learning_vocabulary || {};
         show_user_list(list_name, result[list_name] || {});
     });
 }

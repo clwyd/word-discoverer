@@ -199,6 +199,21 @@ function runVocabListPage() {
     const dictButton = findAll(entries[0], (node) => node.tagName === "BUTTON" && node.textContent === "PopupDict")[0];
     dictButton.click();
     assert.strictEqual(messages.pop().wdm_lookup_popup_url, "https://example.test?q=apple");
+
+    let markedKnown = null;
+    sandbox.add_known_lexeme = (lexeme, cb) => {
+        markedKnown = lexeme;
+        cb("ok", "apple");
+    };
+    sandbox.list_state.listName = "wd_learning_vocabulary";
+    sandbox.list_state.userList = {apple: 1};
+    sandbox.list_state.lists = {wd_learning_vocabulary: {apple: 1}, wd_user_vocabulary: {}};
+    sandbox.render_vocab_page();
+    const markKnownButton = findAll(nodesById.vocabularySection, (node) => node.tagName === "BUTTON" && node.textContent === "Mark Known")[0];
+    markKnownButton.click();
+    assert.strictEqual(markedKnown, "apple");
+    assert.deepStrictEqual(sandbox.list_state.lists.wd_learning_vocabulary, {});
+    assert.deepStrictEqual(sandbox.list_state.lists.wd_user_vocabulary, {apple: 1});
 }
 
 (async function main() {
@@ -213,14 +228,25 @@ function runVocabListPage() {
     assert.match(contentScript, /bubbleDOM\.addEventListener\("mousedown"[\s\S]*?e\.stopPropagation\(\);/);
     assert.match(contentScript, /wdm_lookup_popup_url/);
     assert.match(contentScript, /wdm_popup_position/);
+    assert.match(contentScript, /wdm_mark_learning/);
+    assert.match(contentScript, /make_learning_hl_style/);
+    assert.match(contentScript, /markKnownButton/);
     assert.doesNotMatch(contentScript, /addEventListener\('mousemove'/);
 
     const listScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/black_white.js"), "utf8");
     assert.match(listScript, /function render_vocab_page\(\)/);
     assert.match(listScript, /document\.createElement\("details"\)/);
+    assert.match(listScript, /wd_learning_vocabulary/);
+
+    const contextScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/context_menu_lib.js"), "utf8");
+    assert.match(contextScript, /add_learning_lexeme/);
+    assert.match(contextScript, /wdm_mark_learning/);
+
+    const popupScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/popup.js"), "utf8");
+    assert.match(popupScript, /wd_learning_vocabulary/);
 
     const manifest = JSON.parse(fs.readFileSync(path.join(root, "words_discoverer_chrome/manifest.json"), "utf8"));
-    assert.strictEqual(manifest.version, "2.12.5");
+    assert.strictEqual(manifest.version, "2.12.6");
     assert.strictEqual(manifest.options_ui.page, "adjust.html");
 
     runVocabListPage();

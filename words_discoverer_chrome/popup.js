@@ -87,9 +87,9 @@ function process_adjust() {
 }
 
 function display_vocabulary_size() {
-    chrome.storage.local.get(['wd_user_vocabulary'], function(result) {
-        var wd_user_vocabulary = result.wd_user_vocabulary;
-        var vocab_size = Object.keys(wd_user_vocabulary).length;
+    chrome.storage.local.get(['wd_learning_vocabulary'], function(result) {
+        var learning_vocabulary = result.wd_learning_vocabulary || {};
+        var vocab_size = Object.keys(learning_vocabulary).length;
         document.getElementById("vocabIndicator").textContent = vocab_size;
     });
 }
@@ -97,7 +97,7 @@ function display_vocabulary_size() {
 
 function popup_handle_add_result(report, lemma) {
     if (report === "ok") {
-        request_unhighlight(lemma);
+        request_mark_learning(lemma);
         display_vocabulary_size();
         document.getElementById('addText').value = "";
         document.getElementById('addOpResult').textContent = chrome.i18n.getMessage("addSuccess");
@@ -120,7 +120,7 @@ function process_add_word() {
         document.getElementById('addText').value = "";
         return;
     }
-    add_lexeme(lexeme, popup_handle_add_result);
+    add_learning_lexeme(lexeme, popup_handle_add_result);
 }
 
 function process_rate(increase) {

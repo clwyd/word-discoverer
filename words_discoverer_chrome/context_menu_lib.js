@@ -207,15 +207,18 @@ function createDictionaryEntry(title, dictUrl, entryId) {
     chrome.contextMenus.create({"title": title, "contexts":["selection"], "id": entryId});
 }
 
-function context_handle_add_result(report, lemma) {
-    if (report === "ok") {
-        request_unhighlight(lemma);
+function context_handle_learning_result(tab, report, lemma) {
+    if (report === "ok" && tab && typeof tab.id === "number") {
+        chrome.tabs.sendMessage(tab.id, {wdm_mark_learning: lemma}, function() {
+        });
     }
 }
 
 function onClickHandler(info, tab) {
     var word = info.selectionText;
-    add_lexeme(word, context_handle_add_result);
+    add_learning_lexeme(word, function(report, lemma) {
+        context_handle_learning_result(tab, report, lemma);
+    });
 };
 
 

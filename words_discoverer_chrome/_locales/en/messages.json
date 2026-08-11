@@ -8,8 +8,11 @@
     "description": "The description of the application, displayed in the web store."
   },
   "menuItem": {
-    "message": "Add to vocabulary",
+    "message": "Add to Learning",
     "description": "Text in context menu"
+  },
+  "markKnownButton": {
+    "message": "Mark Known"
   },
   "rateTranslateDbg": {
     "message": "Not highlighting 100 most common English words"
@@ -26,15 +29,15 @@
     "message": "More Settings..."
   },
   "vocabSizeTranslateDbg": {
-    "message": "Your vocabulary size: 100 words."
+    "message": "Learning vocabulary: 100 words."
   },
   "vocabSizeInfo1": {
-    "message": "Your vocabulary size:",
-    "description": "1-st part of \"Your vocabulary size: 100 words.\" sentence"
+    "message": "Learning vocabulary:",
+    "description": "1-st part of \"Learning vocabulary: 100 words.\" sentence"
   },
   "vocabSizeInfo2": {
     "message": "words.",
-    "description": "2-nd part of \"Your vocabulary size: 100 words.\" sentence"
+    "description": "2-nd part of \"Learning vocabulary: 100 words.\" sentence"
   },
   "showVocab": {
     "message": "Manage Local Vocabulary"
@@ -52,7 +55,7 @@
     "message": "Vocabulary tools"
   },
   "tipInfo": {
-    "message": "To add a new expression to your vocabulary you can use mouse hover menu or browser context menu (select text + right click) or this input field:"
+    "message": "To force highlight an expression you want to learn, use browser context menu (select text + right click) or this input field:"
   },
   "addErrorDupp": {
     "message": "Already added."
@@ -61,7 +64,7 @@
     "message": "Unable to add."
   },
   "addSuccess": {
-    "message": "Added."
+    "message": "Added to Learning."
   },
   "saveVisuals": {
     "message": "Save"
@@ -298,6 +301,12 @@
   },
   "vocabNoMatches": {
     "message": "No matching entries"
+  },
+  "vocabLearning": {
+    "message": "Learning"
+  },
+  "vocabKnown": {
+    "message": "Known"
   },
   "importPageTitle": {
     "message": "Word Discoverer: Import vocabulary"

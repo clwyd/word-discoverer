@@ -8,8 +8,11 @@
     "description": "The description of the application, displayed in the web store."
   },
   "menuItem": {
-    "message": "添加到词汇表",
+    "message": "加入学习中",
     "description": "Text in context menu"
+  },
+  "markKnownButton": {
+    "message": "标记为已掌握"
   },
   "rateTranslateDbg": {
     "message": "不高亮最常见的 100 个英语单词"
@@ -26,15 +29,15 @@
     "message": "更多设置..."
   },
   "vocabSizeTranslateDbg": {
-    "message": "你的词汇量：100 个词。"
+    "message": "学习中词汇：100 个词。"
   },
   "vocabSizeInfo1": {
-    "message": "你的词汇量：",
-    "description": "1-st part of \"Your vocabulary size: 100 words.\" sentence"
+    "message": "学习中词汇：",
+    "description": "1-st part of \"Learning vocabulary: 100 words.\" sentence"
   },
   "vocabSizeInfo2": {
     "message": "个词。",
-    "description": "2-nd part of \"Your vocabulary size: 100 words.\" sentence"
+    "description": "2-nd part of \"Learning vocabulary: 100 words.\" sentence"
   },
   "showVocab": {
     "message": "管理本地词汇表"
@@ -52,7 +55,7 @@
     "message": "词汇表工具"
   },
   "tipInfo": {
-    "message": "要把新表达加入词汇表，可以使用鼠标悬停菜单、浏览器右键菜单（选中文本后右键），也可以在这里输入："
+    "message": "要强制高亮一个想学习的表达，可以使用浏览器右键菜单（选中文本后右键），也可以在这里输入："
   },
   "addErrorDupp": {
     "message": "已经添加过。"
@@ -61,7 +64,7 @@
     "message": "无法添加。"
   },
   "addSuccess": {
-    "message": "已添加。"
+    "message": "已加入学习中。"
   },
   "saveVisuals": {
     "message": "保存"
@@ -298,6 +301,12 @@
   },
   "vocabNoMatches": {
     "message": "没有匹配的词条"
+  },
+  "vocabLearning": {
+    "message": "学习中"
+  },
+  "vocabKnown": {
+    "message": "已掌握"
   },
   "importPageTitle": {
     "message": "Word Discoverer：导入词汇表"

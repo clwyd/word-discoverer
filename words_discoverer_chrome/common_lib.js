@@ -5,6 +5,16 @@ function request_unhighlight(lemma) {
 }
 
 
+function request_mark_learning(lemma) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        if (tabs && tabs.length) {
+            chrome.tabs.sendMessage(tabs[0].id, {wdm_mark_learning: lemma}, function() {
+            });
+        }
+    });
+}
+
+
 function make_id_suffix(text) {
     var before = btoa(text);
     var after = before.replace(/\+/g, '_').replace(/\//g, '-').replace(/=/g, '_')
@@ -31,46 +41,53 @@ function sync_if_needed() {
 }
 
 
-function add_lexeme(lexeme, result_handler) {
-    var req_keys = ['words_discoverer_eng_dict', 'wd_idioms', 'wd_user_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'];
+function normalize_lexeme(lexeme, dict_words, dict_idioms) {
+    if (lexeme.length > 100) {
+        return null;
+    }
+    lexeme = lexeme.toLowerCase();
+    lexeme = lexeme.trim();
+    if (!lexeme) {
+        return null;
+    }
+
+    var key = lexeme;
+    if (dict_words.hasOwnProperty(lexeme)) {
+        var wf = dict_words[lexeme];
+        if (wf) {
+            key = wf[0];
+        }
+    } else if (dict_idioms.hasOwnProperty(lexeme)) {
+        var iwf = dict_idioms[lexeme];
+        if (iwf && iwf != -1) {
+            key = iwf;
+        }
+    }
+    return key;
+}
+
+
+function add_known_lexeme(lexeme, result_handler) {
+    var req_keys = ['words_discoverer_eng_dict', 'wd_idioms', 'wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'];
     chrome.storage.local.get(req_keys, function(result) {
-        var dict_words = result.words_discoverer_eng_dict;
-        var dict_idioms = result.wd_idioms;
-        var user_vocabulary = result.wd_user_vocabulary;
+        var dict_words = result.words_discoverer_eng_dict || {};
+        var dict_idioms = result.wd_idioms || {};
+        var user_vocabulary = result.wd_user_vocabulary || {};
+        var learning_vocabulary = result.wd_learning_vocabulary || {};
         var wd_user_vocab_added = result.wd_user_vocab_added;
         var wd_user_vocab_deleted = result.wd_user_vocab_deleted;
-        if (lexeme.length > 100) {
+        var key = normalize_lexeme(lexeme, dict_words, dict_idioms);
+        if (!key) {
             result_handler("bad", undefined);
             return;
         }
-        lexeme = lexeme.toLowerCase();
-        lexeme = lexeme.trim();
-        if (!lexeme) {
-            result_handler("bad", undefined);
-            return;
-        }
-
-        var key = lexeme;
-        if (dict_words.hasOwnProperty(lexeme)) {
-            var wf = dict_words[lexeme];
-            if (wf) {
-                key = wf[0];
-            }
-        } else if (dict_idioms.hasOwnProperty(lexeme)) {
-            var wf = dict_idioms[lexeme];
-            if (wf && wf != -1) {
-                key = wf;
-            }
-        }
-
-        if (user_vocabulary.hasOwnProperty(key)) {
-            result_handler("exists", key);
-            return;
-        }
-
-        var new_state = {'wd_user_vocabulary': user_vocabulary};
 
         user_vocabulary[key] = 1;
+        delete learning_vocabulary[key];
+        var new_state = {
+            'wd_user_vocabulary': user_vocabulary,
+            'wd_learning_vocabulary': learning_vocabulary
+        };
         if (typeof wd_user_vocab_added !== 'undefined') {
             wd_user_vocab_added[key] = 1;
             new_state['wd_user_vocab_added'] = wd_user_vocab_added;
@@ -80,11 +97,54 @@ function add_lexeme(lexeme, result_handler) {
             new_state['wd_user_vocab_deleted'] = wd_user_vocab_deleted;
         }
 
-        chrome.storage.local.set(new_state, function() { 
+        chrome.storage.local.set(new_state, function() {
             sync_if_needed();
             result_handler("ok", key);
         });
     });
+}
+
+
+function add_learning_lexeme(lexeme, result_handler) {
+    var req_keys = ['words_discoverer_eng_dict', 'wd_idioms', 'wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_user_vocab_added', 'wd_user_vocab_deleted'];
+    chrome.storage.local.get(req_keys, function(result) {
+        var dict_words = result.words_discoverer_eng_dict || {};
+        var dict_idioms = result.wd_idioms || {};
+        var user_vocabulary = result.wd_user_vocabulary || {};
+        var learning_vocabulary = result.wd_learning_vocabulary || {};
+        var wd_user_vocab_added = result.wd_user_vocab_added;
+        var wd_user_vocab_deleted = result.wd_user_vocab_deleted;
+        var key = normalize_lexeme(lexeme, dict_words, dict_idioms);
+        if (!key) {
+            result_handler("bad", undefined);
+            return;
+        }
+
+        learning_vocabulary[key] = 1;
+        delete user_vocabulary[key];
+        var new_state = {
+            'wd_user_vocabulary': user_vocabulary,
+            'wd_learning_vocabulary': learning_vocabulary
+        };
+        if (typeof wd_user_vocab_added !== 'undefined') {
+            delete wd_user_vocab_added[key];
+            new_state['wd_user_vocab_added'] = wd_user_vocab_added;
+        }
+        if (typeof wd_user_vocab_deleted !== 'undefined') {
+            wd_user_vocab_deleted[key] = 1;
+            new_state['wd_user_vocab_deleted'] = wd_user_vocab_deleted;
+        }
+
+        chrome.storage.local.set(new_state, function() {
+            sync_if_needed();
+            result_handler("ok", key);
+        });
+    });
+}
+
+
+function add_lexeme(lexeme, result_handler) {
+    add_known_lexeme(lexeme, result_handler);
 }
 
 
@@ -109,6 +169,11 @@ function make_default_hl_settings() {
             color: "blue"
         }
     };
+}
+
+
+function make_learning_hl_style() {
+    return "font-weight:bold;background-color:#fff2a8;color:#16202a;border-bottom:2px solid #117c73;font-size:inherit;display:inline;";
 }
 
 

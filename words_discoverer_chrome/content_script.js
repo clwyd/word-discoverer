@@ -4,6 +4,7 @@ var dict_idioms = null;
 var min_show_rank = null;
 var word_max_rank = null;
 var user_vocabulary = null;
+var learning_vocabulary = null;
 var is_enabled = null;
 var wd_hl_settings = null;
 var wd_hover_settings = null;
@@ -45,6 +46,26 @@ function get_rare_lemma(word) {
         return undefined;
     lemma = wf[0];
     return (!user_vocabulary || !(user_vocabulary.hasOwnProperty(lemma))) ? lemma : undefined;
+}
+
+
+function get_lemma(word) {
+    if (!dict_words)
+        return word;
+    if (dict_words.hasOwnProperty(word) && dict_words[word]) {
+        return dict_words[word][0];
+    }
+    return word;
+}
+
+
+function get_learning_lemma(word) {
+    if (word.length < 3)
+        return undefined;
+    var lemma = get_lemma(word);
+    if (user_vocabulary && user_vocabulary.hasOwnProperty(lemma))
+        return undefined;
+    return (learning_vocabulary && learning_vocabulary.hasOwnProperty(lemma)) ? lemma : undefined;
 }
 
 
@@ -216,7 +237,7 @@ function text_to_hl_nodes(text, dst) {
         }
         num_nonempty += 1;
         var match = undefined;
-        if (!match && wd_hl_settings.idiomParams.enabled) {
+        if (!match && (wd_hl_settings.idiomParams.enabled || learning_vocabulary)) {
             var lwnum = wnum; //look ahead word number
             var libegin = ibegin; //look ahead word begin
             var mwe_prefix = "";
@@ -233,13 +254,28 @@ function text_to_hl_nodes(text, dst) {
                 } else if (wf && wf != -1 && (!libegin || text[libegin - 1] === " ")) { //idiom found
                     if (user_vocabulary && user_vocabulary.hasOwnProperty(wf))
                         break;
-                    match = {normalized: wf, kind: "idiom", begin: ibegin, end: ibegin + mwe_prefix.length};
+                    if (learning_vocabulary && learning_vocabulary.hasOwnProperty(wf)) {
+                        match = {normalized: wf, kind: "learning", begin: ibegin, end: ibegin + mwe_prefix.length};
+                    } else if (wd_hl_settings.idiomParams.enabled) {
+                        match = {normalized: wf, kind: "idiom", begin: ibegin, end: ibegin + mwe_prefix.length};
+                    }
+                    if (!match)
+                        break;
                     ibegin += mwe_prefix.length + 1;
                     num_good += lwnum - wnum + 1;
                     wnum = lwnum + 1;
                 } else { //idiom not found
                     break;
                 }
+            }
+        }
+        if (!match) {
+            lemma = get_learning_lemma(tokens[wnum]);
+            if (lemma) {
+                match = {normalized: lemma, kind: "learning", begin: ibegin, end: ibegin + tokens[wnum].length};
+                ibegin += tokens[wnum].length + 1;
+                wnum += 1;
+                num_good += 1;
             }
         }
         if (!match && wd_hl_settings.wordParams.enabled) {
@@ -256,7 +292,7 @@ function text_to_hl_nodes(text, dst) {
             ibegin += tokens[wnum].length + 1;
             wnum += 1;
         }
-        if (dict_words.hasOwnProperty(tokens[wnum])) {
+        if (wnum < tokens.length && dict_words.hasOwnProperty(tokens[wnum])) {
             num_good += 1;
         }
         if (match) {
@@ -282,6 +318,8 @@ function text_to_hl_nodes(text, dst) {
         } else if (match.kind === "idiom") {
             hlParams = wd_hl_settings.idiomParams;
             text_style = make_hl_style(hlParams);
+        } else if (match.kind === "learning") {
+            text_style = make_learning_hl_style();
         } else if (match.kind === "word") {
             text_style = "font:inherit;display:inline;color:inherit;background-color:inherit;"
         }
@@ -441,6 +479,27 @@ function unhighlight(lemma) {
 }
 
 
+function mark_learning(lemma) {
+    var wdclassname = make_class_name(lemma);
+    var hlNodes = document.getElementsByClassName(wdclassname);
+    for (var i = 0; i < hlNodes.length; i++) {
+        hlNodes[i].setAttribute("style", make_learning_hl_style());
+    }
+}
+
+
+function mark_matching_unhighlighted_nodes_learning(lemma) {
+    var nodes = Array.prototype.slice.call(document.getElementsByClassName("wdautohl_none_none"));
+    for (var i = 0; i < nodes.length; i++) {
+        var text = nodes[i].textContent.toLowerCase();
+        if (text === lemma || get_lemma(text) === lemma) {
+            nodes[i].setAttribute("class", make_class_name(lemma));
+            nodes[i].setAttribute("style", make_learning_hl_style());
+        }
+    }
+}
+
+
 function get_verdict(is_enabled, black_list, white_list, callback_func) {
     chrome.runtime.sendMessage({wdm_request: "hostname"}, function(response) {
         if (!response) {
@@ -478,6 +537,10 @@ function bubble_handle_tts(lexeme) {
 
 function bubble_handle_add_result(report, lemma) {
     if (report === "ok") {
+        user_vocabulary = user_vocabulary || {};
+        learning_vocabulary = learning_vocabulary || {};
+        user_vocabulary[lemma] = 1;
+        delete learning_vocabulary[lemma];
         unhighlight(lemma);
     }
 }
@@ -504,10 +567,10 @@ function create_bubble() {
 
     var addButton = document.createElement('button');
     addButton.setAttribute('class', 'wdAddButton');
-    addButton.textContent = chrome.i18n.getMessage("menuItem");
+    addButton.textContent = chrome.i18n.getMessage("markKnownButton") || "Mark Known";
     addButton.style.marginBottom = "4px";
     addButton.addEventListener("click", function () {
-        add_lexeme(current_lexeme, bubble_handle_add_result);
+        add_known_lexeme(current_lexeme, bubble_handle_add_result);
     });
     bubbleDOM.appendChild(addButton);
 
@@ -559,6 +622,15 @@ function initForPage() {
         if (request.wdm_unhighlight) {
             var lemma = request.wdm_unhighlight;
             unhighlight(lemma);
+        } else if (request.wdm_mark_learning) {
+            var learning_lemma = request.wdm_mark_learning;
+            learning_vocabulary = learning_vocabulary || {};
+            user_vocabulary = user_vocabulary || {};
+            learning_vocabulary[learning_lemma] = 1;
+            delete user_vocabulary[learning_lemma];
+            mark_learning(learning_lemma);
+            mark_matching_unhighlighted_nodes_learning(learning_lemma);
+            doHighlightText(textNodesUnder(document.body));
         }
     });
 
@@ -571,12 +643,13 @@ function initForPage() {
             if (verdict !== "highlight")
                 return;
 
-            chrome.storage.local.get(['words_discoverer_eng_dict', 'wd_online_dicts', 'wd_idioms', 'wd_hover_settings', 'wd_word_max_rank', 'wd_show_percents', 'wd_user_vocabulary', 'wd_hl_settings', 'wd_enable_tts'], function (result) {
+            chrome.storage.local.get(['words_discoverer_eng_dict', 'wd_online_dicts', 'wd_idioms', 'wd_hover_settings', 'wd_word_max_rank', 'wd_show_percents', 'wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_hl_settings', 'wd_enable_tts'], function (result) {
                 dict_words = result.words_discoverer_eng_dict || {};
                 dict_idioms = result.wd_idioms || {};
                 wd_online_dicts = result.wd_online_dicts || make_default_online_dicts();
                 wd_enable_tts = result.wd_enable_tts;
                 user_vocabulary = result.wd_user_vocabulary || {};
+                learning_vocabulary = result.wd_learning_vocabulary || {};
                 wd_hover_settings = result.wd_hover_settings || {hl_hover: 'always', ow_hover: 'never'};
                 word_max_rank = result.wd_word_max_rank || 0;
                 var show_percents = result.wd_show_percents || 15;
