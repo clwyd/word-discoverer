@@ -539,8 +539,11 @@ function initialize_extension() {
             wd_online_dicts = make_default_online_dicts();
             chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
         } else {
-            wd_online_dicts = add_missing_builtin_dicts(wd_online_dicts);
-            chrome.storage.local.set({"wd_online_dicts": wd_online_dicts});
+            var cleaned_online_dicts = sanitize_online_dicts(wd_online_dicts);
+            if (cleaned_online_dicts.length !== wd_online_dicts.length) {
+                chrome.storage.local.set({"wd_online_dicts": cleaned_online_dicts});
+            }
+            wd_online_dicts = cleaned_online_dicts;
         }
         initContextMenus(wd_online_dicts);
 

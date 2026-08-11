@@ -49,8 +49,9 @@
     }
     .toolbar {
         display: grid;
-        grid-template-columns: 160px minmax(220px, 1fr) 180px auto auto;
+        grid-template-columns: 160px auto minmax(220px, 1fr) 180px auto auto;
         gap: 8px;
+        align-items: center;
         margin-bottom: 16px;
     }
     input,
@@ -175,14 +176,26 @@
     .wdDefinitionText,
     .wdDefinitionExample,
     .wdDefinitionSynonyms,
-    .wdDefinitionEmpty,
-    .wdDefinitionRefresh {
+    .wdDefinitionEmpty {
         margin-bottom: 6px;
     }
-    .wdDefinitionRefresh {
+    .wdDefinitionToolbar {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+    .wdDefinitionIcon {
+        width: 28px;
         height: 28px;
-        padding: 0 10px;
+        padding: 0;
         background: var(--surface);
+    }
+    .wdDefinitionRefresh::before {
+        content: "\21bb";
+    }
+    .wdDefinitionPopup::before {
+        content: "\2197";
     }
     .wdDefinitionPart {
         color: var(--accent-strong);
@@ -232,7 +245,6 @@
     <div class="topbar">
         <div>
             <h1 data-i18n="vocabularyPageTitle">Your Vocabulary</h1>
-            <div class="count" id="entryCount"></div>
         </div>
     </div>
     <div class="toolbar">
@@ -240,6 +252,7 @@
             <option value="wd_learning_vocabulary" data-i18n="vocabLearning">Learning</option>
             <option value="wd_user_vocabulary" data-i18n="vocabKnown">Known</option>
         </select>
+        <span class="count" id="entryCount"></span>
         <input type="search" id="listSearch" data-i18n-placeholder="vocabSearchPlaceholder" placeholder="Search vocabulary">
         <select id="sortMode">
             <option value="alpha" data-i18n="vocabSortAlpha">A-Z</option>

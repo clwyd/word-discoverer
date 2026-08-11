@@ -578,6 +578,8 @@ function load_bubble_definition(force_refresh) {
         if (panel.wdDefinitionWord === current_lexeme) {
             render_free_dictionary_definition(panel, definition, chrome.i18n.getMessage, function() {
                 load_bubble_definition(true);
+            }, function(e) {
+                open_bubble_free_dictionary_popup(e);
             });
         }
     });
@@ -601,40 +603,12 @@ function toggle_bubble_definition() {
 }
 
 
-function show_free_dictionary_bubble(word) {
-    var bubbleDOM = document.getElementById("wd_selection_bubble");
-    if (!bubbleDOM) {
-        return;
+function open_bubble_free_dictionary_popup(e) {
+    var message = {wdm_lookup_popup_url: free_dictionary_page_url(current_lexeme)};
+    if (e && typeof e.screenX === "number" && typeof e.screenY === "number") {
+        message.wdm_popup_position = {left: e.screenX + 12, top: e.screenY + 12};
     }
-    current_lexeme = word;
-    current_is_highlighted = false;
-    document.getElementById("wd_selection_bubble_text").textContent = limit_text_len(word);
-    document.getElementById("wd_selection_bubble_freq").textContent = "n/a";
-    document.getElementById("wd_selection_bubble_action").textContent = chrome.i18n.getMessage("menuItem") || "Add to Learning";
-    reset_bubble_definition();
-    bubbleDOM.style.display = "block";
-    var point = {x: Math.floor(window.innerWidth / 2), y: Math.floor(window.innerHeight / 3)};
-    var sel = window.getSelection();
-    if (sel && sel.rangeCount) {
-        var rect = sel.getRangeAt(0).getBoundingClientRect();
-        if (rect && rect.bottom) {
-            point = {x: Math.floor((rect.left + rect.right) / 2), y: rect.bottom};
-        }
-    }
-    var width = bubbleDOM.offsetWidth || 280;
-    var height = bubbleDOM.offsetHeight || 160;
-    var left = point.x + 12;
-    if (left + width + 8 > window.innerWidth) {
-        left = point.x - width - 12;
-    }
-    var top = point.y + 12;
-    if (top + height + 8 > window.innerHeight) {
-        top = point.y - height - 12;
-    }
-    bubbleDOM.style.left = Math.max(5, left) + "px";
-    bubbleDOM.style.top = Math.max(5, top) + "px";
-    rendered_node_id = null;
-    load_bubble_definition(false);
+    chrome.runtime.sendMessage(message);
 }
 
 
@@ -704,6 +678,13 @@ function create_bubble() {
     });
     bubbleDOM.appendChild(speakButton);
 
+    var definitionButton = document.createElement('button');
+    definitionButton.setAttribute('class', 'wdAddButton');
+    definitionButton.textContent = chrome.i18n.getMessage("builtinDefinitionButton") || "Built-in Definition";
+    definitionButton.style.marginBottom = "4px";
+    definitionButton.addEventListener("click", toggle_bubble_definition);
+    bubbleDOM.appendChild(definitionButton);
+
     var definitionPanel = document.createElement('div');
     definitionPanel.setAttribute('class', 'wdDefinitionPanel');
     definitionPanel.setAttribute('id', 'wd_selection_bubble_definition');
@@ -719,10 +700,6 @@ function create_bubble() {
         dictButton.addEventListener("click", function (e) {
             var target = e.target;
             var dictUrl = target.getAttribute('wdDictRefUrl');
-            if (is_free_dictionary_url(dictUrl)) {
-                toggle_bubble_definition();
-                return;
-            }
             var newTabUrl = get_dict_definition_url(dictUrl, current_lexeme);
             chrome.runtime.sendMessage({
                 wdm_lookup_popup_url: newTabUrl,
@@ -765,8 +742,6 @@ function initForPage() {
             mark_learning(learning_lemma);
             mark_matching_unhighlighted_nodes_learning(learning_lemma);
             doHighlightText(textNodesUnder(document.body));
-        } else if (request.wdm_show_free_dictionary) {
-            show_free_dictionary_bubble(request.wdm_show_free_dictionary);
         }
     });
 
@@ -782,7 +757,7 @@ function initForPage() {
             chrome.storage.local.get(['words_discoverer_eng_dict', 'wd_online_dicts', 'wd_idioms', 'wd_hover_settings', 'wd_word_max_rank', 'wd_show_percents', 'wd_user_vocabulary', 'wd_learning_vocabulary', 'wd_hl_settings', 'wd_enable_tts'], function (result) {
                 dict_words = result.words_discoverer_eng_dict || {};
                 dict_idioms = result.wd_idioms || {};
-                wd_online_dicts = result.wd_online_dicts || make_default_online_dicts();
+                wd_online_dicts = result.wd_online_dicts ? sanitize_online_dicts(result.wd_online_dicts) : make_default_online_dicts();
                 wd_enable_tts = result.wd_enable_tts;
                 user_vocabulary = result.wd_user_vocabulary || {};
                 learning_vocabulary = result.wd_learning_vocabulary || {};

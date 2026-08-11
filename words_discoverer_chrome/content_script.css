@@ -186,3 +186,156 @@
 wdautohl-customtag {
     visibility: visible !important;
 }
+
+.wdSelectionBubble {
+    width: 300px !important;
+    padding: 8px !important;
+    opacity: 1 !important;
+    background: #ffffff !important;
+    border: 1px solid #d8e0ea !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 28px rgba(22, 32, 42, 0.18) !important;
+    color: #16202a !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+}
+
+.wdInfoSpan,
+.wdFreqSpan {
+    display: inline-block !important;
+    float: none !important;
+    width: auto !important;
+    max-width: 200px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 4px 7px !important;
+    margin: 0 4px 8px 0 !important;
+    border: 1px solid #d8e0ea !important;
+    border-radius: 999px !important;
+    background: #eef3f8 !important;
+    color: #16202a !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    text-align: left !important;
+    overflow-wrap: anywhere !important;
+}
+
+.wdFreqSpan {
+    color: #627084 !important;
+    text-align: center !important;
+}
+
+.wdAddButton {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    padding: 0 10px !important;
+    margin: 0 0 6px 0 !important;
+    border: 1px solid #d8e0ea !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    color: #16202a !important;
+    cursor: pointer !important;
+    display: block !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    box-shadow: none !important;
+}
+
+.wdAddButton:hover {
+    background: #eef3f8 !important;
+    border-color: #b9c6d4 !important;
+    color: #16202a !important;
+}
+
+.wdDefinitionPanel {
+    clear: both !important;
+    max-height: 190px !important;
+    overflow: auto !important;
+    padding: 8px !important;
+    margin: 2px 0 6px 0 !important;
+    background: #f5f7fb !important;
+    color: #16202a !important;
+    border: 1px solid #d8e0ea !important;
+    border-radius: 6px !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: normal !important;
+    line-height: 1.4 !important;
+    text-align: left !important;
+}
+
+.wdDefinitionToolbar {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    margin: 0 0 7px 0 !important;
+}
+
+.wdDefinitionIcon {
+    width: 26px !important;
+    min-width: 26px !important;
+    height: 26px !important;
+    min-height: 26px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 1px solid #d8e0ea !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    color: #16202a !important;
+    cursor: pointer !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+}
+
+.wdDefinitionIcon:hover {
+    background: #eef3f8 !important;
+}
+
+.wdDefinitionRefresh::before {
+    content: "\21bb" !important;
+}
+
+.wdDefinitionPopup::before {
+    content: "\2197" !important;
+}
+
+.wdDefinitionPhonetic,
+.wdDefinitionPart,
+.wdDefinitionText,
+.wdDefinitionExample,
+.wdDefinitionSynonyms,
+.wdDefinitionEmpty {
+    margin: 0 0 6px 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    color: #16202a !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    text-align: left !important;
+}
+
+.wdDefinitionPart {
+    color: #0b5f59 !important;
+    font-weight: 700 !important;
+}
+
+.wdDefinitionExample,
+.wdDefinitionSynonyms,
+.wdDefinitionPhonetic,
+.wdDefinitionEmpty {
+    color: #627084 !important;
+}

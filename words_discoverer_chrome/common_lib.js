@@ -46,10 +46,19 @@ function get_vocabulary_filename(list_name) {
 }
 
 
-var FREE_DICTIONARY_URL = "wd-builtin://free-dictionary";
+function sanitize_online_dicts(dictPairs) {
+    var result = [];
+    for (var i = 0; dictPairs && i < dictPairs.length; ++i) {
+        if (dictPairs[i] && dictPairs[i].url !== "wd-builtin://free-dictionary") {
+            result.push(dictPairs[i]);
+        }
+    }
+    return result;
+}
 
-function is_free_dictionary_url(url) {
-    return url === FREE_DICTIONARY_URL;
+
+function free_dictionary_page_url(word) {
+    return "https://www.thefreedictionary.com/" + encodeURIComponent((word || "").trim());
 }
 
 
@@ -113,7 +122,7 @@ function normalize_free_dictionary_response(word, data) {
 }
 
 
-function render_free_dictionary_definition(container, definition, get_message, refresh_handler) {
+function render_free_dictionary_definition(container, definition, get_message, refresh_handler, popup_handler) {
     while (container.firstChild) {
         container.removeChild(container.firstChild);
     }
@@ -127,12 +136,24 @@ function render_free_dictionary_definition(container, definition, get_message, r
         container.appendChild(node);
         return node;
     }
-    if (refresh_handler) {
-        var refreshButton = document.createElement("button");
-        refreshButton.setAttribute("class", "wdDefinitionRefresh");
-        refreshButton.textContent = msg("definitionRefresh", "Refresh");
-        refreshButton.addEventListener("click", refresh_handler);
-        container.appendChild(refreshButton);
+    function append_icon_button(class_name, label, handler) {
+        var button = document.createElement("button");
+        button.setAttribute("class", "wdDefinitionIcon " + class_name);
+        button.setAttribute("title", label);
+        button.setAttribute("aria-label", label);
+        button.addEventListener("click", handler);
+        return button;
+    }
+    if (refresh_handler || popup_handler) {
+        var toolbar = document.createElement("div");
+        toolbar.setAttribute("class", "wdDefinitionToolbar");
+        if (refresh_handler) {
+            toolbar.appendChild(append_icon_button("wdDefinitionRefresh", msg("definitionRefresh", "Refresh"), refresh_handler));
+        }
+        if (popup_handler) {
+            toolbar.appendChild(append_icon_button("wdDefinitionPopup", msg("definitionOpenPopup", "Open in Free Dictionary"), popup_handler));
+        }
+        container.appendChild(toolbar);
     }
     if (!definition || !definition.ok) {
         append_text("wdDefinitionEmpty", msg("definitionUnavailable", "Definition unavailable"));

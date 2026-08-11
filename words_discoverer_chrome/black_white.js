@@ -216,6 +216,8 @@ function load_full_definition(word, node, force_refresh) {
     request_free_dictionary_definition(word, force_refresh, function(definition) {
         render_free_dictionary_definition(node, definition, chrome.i18n.getMessage, function() {
             load_full_definition(word, node, true);
+        }, function() {
+            open_lookup_popup(free_dictionary_page_url(word));
         });
     });
 }
@@ -281,10 +283,6 @@ function create_vocab_entry(info) {
     for (var i = 0; i < dictPairs.length; ++i) {
         (function(dict) {
             actions.appendChild(create_button(dict.title, "", function() {
-                if (is_free_dictionary_url(dict.url)) {
-                    load_full_definition(info.key, definitionPanel, true);
-                    return;
-                }
                 open_lookup_popup(get_dict_definition_url(dict.url, info.key));
             }));
         })(dictPairs[i]);
@@ -433,7 +431,7 @@ function process_display() {
     chrome.storage.local.get(req_keys, function(result) {
         list_state.dictWords = result.words_discoverer_eng_dict || {};
         list_state.dictIdioms = result.wd_idioms || {};
-        list_state.onlineDicts = result.wd_online_dicts || [];
+        list_state.onlineDicts = sanitize_online_dicts(result.wd_online_dicts || []);
         list_state.wordMaxRank = result.wd_word_max_rank || 0;
         list_state.lists.wd_user_vocabulary = result.wd_user_vocabulary || {};
         list_state.lists.wd_learning_vocabulary = result.wd_learning_vocabulary || {};

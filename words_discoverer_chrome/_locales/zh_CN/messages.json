@@ -245,6 +245,9 @@
   "definitionRefresh": {
     "message": "刷新"
   },
+  "definitionOpenPopup": {
+    "message": "在 Free Dictionary 中打开"
+  },
   "definitionNone": {
     "message": "未找到释义"
   },
@@ -256,9 +259,6 @@
   },
   "dictTranslateGoogle": {
     "message": "在 Google 中翻译为 {0}"
-  },
-  "dictFreeDictionary": {
-    "message": "Free Dictionary 内置释义"
   },
   "dictMerriamWebster": {
     "message": "在 Merriam-Webster 中查询释义"

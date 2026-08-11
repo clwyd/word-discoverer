@@ -269,12 +269,14 @@
         font: inherit;
     }
     .vocabTools {
-        display: grid;
-        gap: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
     }
     .vocabCount {
         color: var(--muted);
-        margin-left: 8px;
+        margin-left: 4px;
     }
     .existingDictName,
     .existingDictUrl {
@@ -311,22 +313,15 @@
     <button class="longButton" id="testManifestWarningsBtn">__MSG_debugManifestWarnings__</button>
   </div>
   <fieldset class="vocabTools">
-    <div>
-      <span class="smallHeader" data-i18n="vocabularyToolsHeader">Vocabulary tools</span>
-      <span class="vocabCount" id="vocabToolsCount"></span>
-    </div>
-    <div class="buttonRow">
-      <button class="longButton primary" id="manageVocab" data-i18n="manageVocab">Manage Vocabulary</button>
-    </div>
-    <div class="buttonRow">
-      <button class="longButton" id="loadVocab" data-i18n="loadVocab">Import Vocabulary</button>
-      <button class="longButton" id="saveVocab" data-i18n="saveVocab">Export Vocabulary</button>
-      <select id="vocabListMode">
-        <option value="wd_learning_vocabulary" data-i18n="vocabLearning">Learning</option>
-        <option value="wd_user_vocabulary" data-i18n="vocabKnown">Known</option>
-      </select>
-      <input id="loadVocabFile" type="file">
-    </div>
+    <button class="longButton primary" id="manageVocab" data-i18n="manageVocab">Manage Vocabulary</button>
+    <button class="longButton" id="loadVocab" data-i18n="loadVocab">Import Vocabulary</button>
+    <button class="longButton" id="saveVocab" data-i18n="saveVocab">Export Vocabulary</button>
+    <select id="vocabListMode">
+      <option value="wd_learning_vocabulary" data-i18n="vocabLearning">Learning</option>
+      <option value="wd_user_vocabulary" data-i18n="vocabKnown">Known</option>
+    </select>
+    <span class="vocabCount" id="vocabToolsCount"></span>
+    <input id="loadVocabFile" type="file">
   </fieldset>
   <br>
   <fieldset>

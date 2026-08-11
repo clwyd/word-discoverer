@@ -3,142 +3,157 @@
   <head>
     <meta charset="utf-8">
     <style>
-    body {
-        background-color: rgb(255,248,220);
-        min-width: 340px;
-        max-width: 340px;
-    }
-    fieldset {
-        background-color: orange;
-        padding: 8px;
-        border: 0;
-    }
-    .rateButton {
-        width: 40px;
-        background-color: #4CAF50; /* Green */
-        border: none;
-        color: white;
-        padding: 4px 6px;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 12px;
-        margin: 4px 2px;
-        transition-duration: 0.4s;
-        cursor: pointer;
-    }
-    .rateButton:hover {
-        background-color: #3e8e41;
-    }
-    .helpButton {
-        width: 40px;
-        background-color: #4CAF50; /* Green */
-        border: none;
-        color: white;
-        padding: 4px 2px;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 12px;
-        margin: 4px 2px;
-        font-weight: bold;
-        transition-duration: 0.4s;
-        cursor: pointer;
-        float: right;
-    }
-    .helpButton:hover {
-        background-color: #3e8e41;
-    }
-    .margin_bottom {
-        margin-bottom: 10px !important;
-    }
+        :root {
+            color-scheme: light;
+            --bg: #f5f7fb;
+            --surface: #ffffff;
+            --surface-strong: #eef3f8;
+            --text: #16202a;
+            --muted: #627084;
+            --line: #d8e0ea;
+            --accent: #117c73;
+            --accent-strong: #0b5f59;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            min-width: 340px;
+            max-width: 340px;
+            margin: 0;
+            padding: 10px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        fieldset {
+            background: var(--surface);
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            margin: 0;
+        }
+        button {
+            min-height: 34px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: var(--surface);
+            color: var(--text);
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        button:hover {
+            background: var(--surface-strong);
+        }
+        .rateButton {
+            width: 44px;
+            padding: 0 6px;
+            margin: 4px 2px;
+        }
+        .helpButton {
+            width: 40px;
+            padding: 0;
+            margin: 4px 2px;
+            float: right;
+        }
+        .margin_bottom {
+            margin-bottom: 10px !important;
+        }
     .display_block {
         display: block !important;
     }
-    .vocabButton {
-        width: 100%;
-        min-height: 34px;
-        background-color: #4CAF50; /* Green */
-        border: none;
-        border-radius: 6px;
-        color: white;
-        padding: 4px 6px;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 14px;
-        font-weight: bold;
-        margin: 4px 2px;
-        transition-duration: 0.4s;
-        cursor: pointer;
-    }
-    .vocabButton:hover {
-        background-color: #3e8e41;
-    }
-    .addButton {
-        background-color: orange;
-        border: none;
-        padding: 0px 0px 0px 0px;
-        margin: 0px 4px 0px 10px;
-        cursor: pointer;
-    }
-    .indicator {
-        color: green;
-        font-weight: bold;
-    }
-    #rateIndicator2 {
-        width: 40px;
-        font-size: 16px;
-        color: green;
-        font-weight: bold;
-        text-align: center;
-    }
-    .rateInfo {
-        font-size: 14px;
-        margin: 4px 2px;
-    }
-    input[type=text] {
-        font-size: 14px;
-        box-sizing: border-box;
-        height: 25px;
-        width: 150px;
-        margin: 4px 2px;
-    }
-    .rangeLabel {
-        background-color: purple;
-        display: inline-block;
-        width: 80px;
-        padding: 2px;
-        text-align: center;
-        vertical-align: middle;
-        color: white;
-    }
+        .vocabButton {
+            width: 100%;
+            min-height: 34px;
+            padding: 0 12px;
+            margin: 4px 2px;
+        }
+        .vocabButton:hover {
+            background: var(--surface-strong);
+        }
+        .addButton {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            margin: 4px 0 0 6px;
+            vertical-align: top;
+        }
+        .addButton img {
+            width: 16px;
+            height: 16px;
+        }
+        .indicator {
+            color: var(--accent);
+            font-weight: 700;
+        }
+        #rateIndicator2 {
+            display: inline-block;
+            width: 52px;
+            font-size: 16px;
+            color: var(--accent);
+            font-weight: 700;
+            text-align: center;
+        }
+        .rateInfo {
+            font-size: 14px;
+            margin: 4px 2px;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+        input[type=text] {
+            font-size: 14px;
+            box-sizing: border-box;
+            height: 34px;
+            width: calc(100% - 44px);
+            margin: 4px 2px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: var(--surface);
+            color: var(--text);
+            padding: 0 10px;
+        }
+        .rangeLabel {
+            background-color: var(--surface-strong);
+            display: inline-block;
+            width: 80px;
+            padding: 2px;
+            text-align: center;
+            vertical-align: middle;
+            color: var(--text);
+        }
     .middleCentered {
         height: 50px;
         vertical-align: middle;
         display: table-cell;
     }
-    .warningLabel{
-        color: red;
-        padding: 2px;
-        text-align: center;
-        font-weight: bold;
-    }
-    .cbLabel {
-        font-size: 14px;
-    }
-    #add_to_list_group {
-        margin-top: 10px;
-        margin-left: 20px;
-    }
+        .warningLabel{
+            color: #b42318;
+            padding: 2px;
+            text-align: center;
+            font-weight: 700;
+        }
+        .cbLabel {
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.5;
+        }
+        #add_to_list_group {
+            margin-top: 10px;
+            margin-left: 0;
+        }
 
-    .pageCentered {
-        width: 200px;
-        position: fixed;
-        left: 50%;
-        margin-left: -100px;
-        background-color: purple;
-        color: white;
-        padding: 2px;
-        text-align: center;
-        vertical-align: middle;
+        .pageCentered {
+            width: 200px;
+            position: fixed;
+            left: 50%;
+            margin-left: -100px;
+            background-color: var(--surface-strong);
+            color: var(--text);
+            padding: 2px;
+            text-align: center;
+            vertical-align: middle;
     }
     </style>
     <title>__MSG_appName__</title>
