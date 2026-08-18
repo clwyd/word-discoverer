@@ -371,7 +371,7 @@ function runVocabListPage() {
     const contentScript = fs.readFileSync(path.join(root, "words_discoverer_chrome/content_script.js"), "utf8");
     assert.match(contentScript, /bubbleDOM\.addEventListener\("mousedown"[\s\S]*?e\.stopPropagation\(\);/);
     assert.match(contentScript, /wdm_lookup_popup_url/);
-    assert.match(contentScript, /wdm_popup_position/);
+    assert.doesNotMatch(contentScript, /wdm_popup_position/);
     assert.match(contentScript, /wdm_mark_learning/);
     assert.match(contentScript, /make_learning_hl_style/);
     assert.match(contentScript, /markKnownButton/);
@@ -421,7 +421,7 @@ function runVocabListPage() {
     assert.strictEqual(fs.existsSync(path.join(root, "words_discoverer_chrome/import.js")), false);
 
     const manifest = JSON.parse(fs.readFileSync(path.join(root, "words_discoverer_chrome/manifest.json"), "utf8"));
-    assert.strictEqual(manifest.version, "2.12.13");
+    assert.strictEqual(manifest.version, "2.12.14");
     assert.deepStrictEqual(manifest.host_permissions, ["https://api.dictionaryapi.dev/*"]);
     assert.strictEqual(manifest.options_ui.page, "adjust.html");
 

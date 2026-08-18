@@ -578,8 +578,8 @@ function load_bubble_definition(force_refresh) {
         if (panel.wdDefinitionWord === current_lexeme) {
             render_free_dictionary_definition(panel, definition, chrome.i18n.getMessage, function() {
                 load_bubble_definition(true);
-            }, function(e) {
-                open_bubble_free_dictionary_popup(e);
+            }, function() {
+                open_bubble_free_dictionary_popup();
             });
         }
     });
@@ -603,12 +603,8 @@ function toggle_bubble_definition() {
 }
 
 
-function open_bubble_free_dictionary_popup(e) {
-    var message = {wdm_lookup_popup_url: free_dictionary_page_url(current_lexeme)};
-    if (e && typeof e.screenX === "number" && typeof e.screenY === "number") {
-        message.wdm_popup_position = {left: e.screenX + 12, top: e.screenY + 12};
-    }
-    chrome.runtime.sendMessage(message);
+function open_bubble_free_dictionary_popup() {
+    chrome.runtime.sendMessage({wdm_lookup_popup_url: free_dictionary_page_url(current_lexeme)});
 }
 
 
@@ -701,10 +697,7 @@ function create_bubble() {
             var target = e.target;
             var dictUrl = target.getAttribute('wdDictRefUrl');
             var newTabUrl = get_dict_definition_url(dictUrl, current_lexeme);
-            chrome.runtime.sendMessage({
-                wdm_lookup_popup_url: newTabUrl,
-                wdm_popup_position: {left: e.screenX + 12, top: e.screenY + 12}
-            });
+            chrome.runtime.sendMessage({wdm_lookup_popup_url: newTabUrl});
         });
         bubbleDOM.appendChild(dictButton);
     }
